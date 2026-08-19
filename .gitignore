@@ -1,0 +1,78 @@
+# ============================
+#  DEPENDENCIES
+# ============================
+node_modules/
+.pnpm-store/
+yarn-error.log*
+npm-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================
+#  BUILD OUTPUTS
+# ============================
+dist/
+dist-ssr/
+*.local
+coverage/
+.nyc_output/
+
+# ============================
+#  🔴 ENVIRONMENT VARIABLES
+#  (NEVER commit these!)
+# ============================
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+*.local
+*.local.*
+!*.env.example
+
+# ============================
+#  CACHE & TEMP FILES
+# ============================
+.cache/
+.temp/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+.vite/
+.vite-inspect/
+
+# ============================
+#  IDE / EDITOR FILES
+# ============================
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+*.log
+
+# ============================
+#  TEST COVERAGE
+# ============================
+__screenshots__/
+/cypress/videos/
+/cypress/screenshots/
+/cypress/downloads/
+test-results/
+playwright-report/
+
+# ============================
+#  MISC (optional)
+# ============================
+*.tgz
+*.tar.gz
+*.zip
+.DS_Store
+*.pem
+*.cert
+*.key
