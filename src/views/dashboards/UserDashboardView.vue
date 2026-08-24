@@ -943,9 +943,13 @@ const connectWebSocket = () => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.close(1000, "Reconnecting")
   }
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-  const host = window.location.hostname === "localhost" ? "127.0.0.1:8000" : window.location.host
-  const wsUrl = `${protocol}//${host}/ws/route/${userId}?token=${token}`
+
+  // ✅ CORRECT – use the backend host from api.defaults.baseURL
+  const apiBase = api.defaults.baseURL              // e.g., 'https://roadrescue-api.onrender.com'
+  const url = new URL(apiBase)
+  const wsHost = url.host                           // e.g., 'roadrescue-api.onrender.com'
+  const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  const wsUrl = `${protocol}//${wsHost}/ws/route/${userId}?token=${token}`
   console.log("Connecting to WebSocket:", wsUrl)
 
   ws = new WebSocket(wsUrl)
@@ -993,7 +997,6 @@ const connectWebSocket = () => {
     wsConnected.value = false
   }
 }
-
 const handleWebSocketMessage = (data) => {
   const messageType = data.type
   switch (messageType) {
