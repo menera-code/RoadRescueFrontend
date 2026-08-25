@@ -13,6 +13,11 @@ const email = ref("")
 const password = ref("")
 const error = ref("")
 const loading = ref(false)
+const showPassword = ref(false)
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
 
 const submit = async () => {
   error.value = ""
@@ -80,7 +85,19 @@ const submit = async () => {
 
           <div class="form-group">
             <label class="label">Password</label>
-            <input class="input" v-model="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+            <div class="password-wrapper">
+              <input
+                class="input"
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+              <button type="button" class="toggle-password" @click="togglePassword" tabindex="-1">
+                <span v-if="showPassword">🙈</span>
+                <span v-else>👁️</span>
+              </button>
+            </div>
           </div>
 
           <button class="btn btn-primary" :disabled="loading" @click="submit">
@@ -323,6 +340,34 @@ const submit = async () => {
   outline: none;
   border-color: #2a5298;
   box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .input {
+  flex: 1;
+  padding-right: 2.8rem; /* space for toggle button */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #64748b;
+  padding: 0.25rem;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: #1e293b;
 }
 
 .alert {
