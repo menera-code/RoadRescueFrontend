@@ -12,6 +12,48 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
+      manifest: {
+        name: 'RESQAPP - Road Rescue Assistance',
+        short_name: 'RESQAPP',
+        description:
+          'Road Emergency and Quick Response Application for incident reporting and emergency assistance.',
+
+        theme_color: '#dc2626',
+        background_color: '#ffffff',
+
+        display: 'standalone',
+
+        start_url: '/',
+        scope: '/',
+
+        orientation: 'portrait',
+
+        categories: [
+          'emergency',
+          'navigation',
+          'utilities',
+        ],
+
+        icons: [
+          {
+            src: '/pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: '/pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
