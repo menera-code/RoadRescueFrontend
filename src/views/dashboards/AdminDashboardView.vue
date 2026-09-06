@@ -2057,21 +2057,57 @@ const go = async (section) => {
 // ============================================================
 //  AUTO REFRESH
 // ============================================================
-const refreshDashboardStats = async () => { if (active.value === "dashboard") await loadDashboardStats(); };
-const refreshIncidents = async () => { if (active.value === "incidents") await loadAllIncidents(); };
-const refreshUsers = async () => { if (active.value === "users") await loadAllUsers(); };
-const refreshLegal = async () => { if (active.value === "legal") await loadLegalCompliances(); };
-const refreshAssignments = async () => { if (active.value === "assignments") await loadAssignments(); };
-const refreshAnnouncements = async () => { if (active.value === "announcements") await loadAnnouncements(); };
-const refreshHeatmap = async () => { if (active.value === "heatmap") await loadHeatmapData(); };
+//
+// Use ONE timer for the entire Admin Dashboard instead of
+// seven independent timers.
+//
+// Every 30 seconds, only the currently active section is refreshed.
+//
 
-useAutoRefresh({ refreshFn: refreshDashboardStats, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshIncidents, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshUsers, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshLegal, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshAssignments, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshAnnouncements, interval: 30000, enabled: true });
-useAutoRefresh({ refreshFn: refreshHeatmap, interval: 30000, enabled: true, preserveMap: true, mapRef });
+const refreshActiveSection = async () => {
+  switch (active.value) {
+    case "dashboard":
+      await loadDashboardStats();
+      break;
+
+    case "incidents":
+      await loadAllIncidents();
+      break;
+
+    case "users":
+      await loadAllUsers();
+      break;
+
+    case "legal":
+      await loadLegalCompliances();
+      break;
+
+    case "assignments":
+      await loadAssignments();
+      break;
+
+    case "announcements":
+      await loadAnnouncements();
+      break;
+
+    case "heatmap":
+      await loadHeatmapData();
+      break;
+
+    default:
+      // Do not refresh sections that do not need automatic polling.
+      break;
+  }
+};
+
+useAutoRefresh({
+  refreshFn: refreshActiveSection,
+  interval: 30000,
+  enabled: true,
+  preserveScroll: true,
+  preserveMap: true,
+  mapRef,
+});
 
 // ============================================================
 //  LIFECYCLE
