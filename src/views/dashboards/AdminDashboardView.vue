@@ -106,12 +106,10 @@ const todaysIncidents = computed(() => {
   ).length;
 });
 
-// For vehicle types – total count
 const totalVehicleCount = computed(() => {
   return analyticsData.value.vehicleTypes.reduce((sum, item) => sum + item.count, 0);
 });
 
-// For barangay trends – max value for scaling bars
 const maxBarangayPeriodCount = computed(() => {
   const all = analyticsData.value.barangayTrends.flatMap(b => [b.today, b.week, b.month]);
   return all.length ? Math.max(...all, 1) : 1;
@@ -129,7 +127,7 @@ const criticalCount = computed(() => {
 });
 
 // ============================================================
-//  INCIDENTS MANAGEMENT
+//  INCIDENTS MANAGEMENT (with pagination & sorting)
 // ============================================================
 const allIncidents = ref([]);
 const incidentsLoading = ref(false);
@@ -138,6 +136,23 @@ const selectedIncident = ref(null);
 const showIncidentModal = ref(false);
 const incidentDetails = ref(null);
 const loadingIncident = ref(false);
+
+// Pagination for incidents
+const incidentsPagination = reactive({
+  currentPage: 1,
+  perPage: 10,
+  total: 0,
+});
+const totalIncidentsPages = computed(() => Math.ceil(incidentsPagination.total / incidentsPagination.perPage) || 1);
+
+// Sorted and paginated incidents
+const paginatedIncidents = computed(() => {
+  const sorted = [...allIncidents.value].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  incidentsPagination.total = sorted.length;
+  const start = (incidentsPagination.currentPage - 1) * incidentsPagination.perPage;
+  const end = start + incidentsPagination.perPage;
+  return sorted.slice(start, end);
+});
 
 const severityColors = { critical: "#dc2626", high: "#f59e0b", medium: "#3b82f6", low: "#10b981" };
 const statusColors = { pending: "#f59e0b", "in-progress": "#3b82f6", resolved: "#10b981" };
@@ -151,6 +166,7 @@ const loadAllIncidents = async () => {
       ...inc,
       assigned_to: inc.assigned_to != null ? Number(inc.assigned_to) : null,
     }));
+    incidentsPagination.currentPage = 1; // reset to first page on filter change
   } catch (error) {
     console.error("Failed to load incidents:", error);
   } finally {
@@ -239,12 +255,28 @@ const resolveIncidentFromModal = async () => {
 };
 
 // ============================================================
-//  ASSIGNMENTS
+//  ASSIGNMENTS (with pagination & sorting)
 // ============================================================
 const assignmentsList = ref([]);
 const assignmentsLoading = ref(false);
 const assignmentsFilterResponder = ref("all");
 const availableResponders = ref([]);
+
+// Pagination for assignments
+const assignmentsPagination = reactive({
+  currentPage: 1,
+  perPage: 10,
+  total: 0,
+});
+const totalAssignmentsPages = computed(() => Math.ceil(assignmentsPagination.total / assignmentsPagination.perPage) || 1);
+
+const paginatedAssignments = computed(() => {
+  const sorted = [...assignmentsList.value].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  assignmentsPagination.total = sorted.length;
+  const start = (assignmentsPagination.currentPage - 1) * assignmentsPagination.perPage;
+  const end = start + assignmentsPagination.perPage;
+  return sorted.slice(start, end);
+});
 
 const loadAssignments = async () => {
   assignmentsLoading.value = true;
@@ -257,6 +289,7 @@ const loadAssignments = async () => {
       ...inc,
       assigned_to: inc.assigned_to ? Number(inc.assigned_to) || null : null,
     }));
+    assignmentsPagination.currentPage = 1;
   } catch (error) {
     console.error("Failed to load assignments:", error);
   } finally {
@@ -280,17 +313,14 @@ const getResponderName = (responderId) => {
 };
 
 const assignToResponder = async (incidentId, responderId) => {
-  // 1. Convert to number or null
   let finalResponderId = null;
   if (responderId && responderId !== "null") {
     const num = Number(responderId);
     if (!isNaN(num)) finalResponderId = num;
   }
 
-  // 2. Store previous value for rollback
   const previousValue = allIncidents.value.find(i => i.id === incidentId)?.assigned_to ?? null;
 
-  // 3. Optimistic update
   const updateIncident = (inc) => {
     if (inc.id === incidentId) inc.assigned_to = finalResponderId;
   };
@@ -302,7 +332,6 @@ const assignToResponder = async (incidentId, responderId) => {
     const res = await api.post(`/admin/incidents/${incidentId}/assign`, null, { params });
     const newAssigned = res.data.assigned_to;
 
-    // If backend returns a different value, sync again
     if (newAssigned !== finalResponderId) {
       allIncidents.value.forEach(i => { if (i.id === incidentId) i.assigned_to = newAssigned; });
       assignmentsList.value.forEach(i => { if (i.id === incidentId) i.assigned_to = newAssigned; });
@@ -311,7 +340,6 @@ const assignToResponder = async (incidentId, responderId) => {
   } catch (error) {
     console.error("Assignment error:", error);
     showNotification(`Assignment failed: ${error.response?.data?.detail || error.message}`, "error");
-    // 4. Rollback to previous value
     allIncidents.value.forEach(i => { if (i.id === incidentId) i.assigned_to = previousValue; });
     assignmentsList.value.forEach(i => { if (i.id === incidentId) i.assigned_to = previousValue; });
   }
@@ -321,7 +349,6 @@ const autoAssignAll = async () => {
   try {
     const res = await api.post("/admin/incidents/auto-assign");
     const assignments = res.data.assignments || [];
-    // Update local arrays immediately
     assignments.forEach(({ incident_id, assigned_to }) => {
       allIncidents.value.forEach(i => {
         if (i.id === incident_id) i.assigned_to = assigned_to;
@@ -331,9 +358,6 @@ const autoAssignAll = async () => {
       });
     });
     showNotification(`✅ Assigned ${res.data.assigned} incidents automatically`, "success");
-    // Optional: refresh to get updated statuses, etc.
-    // await loadAssignments();
-    // await loadAllIncidents();
   } catch (error) {
     showNotification("Auto‑assignment failed", "error");
   }
@@ -344,23 +368,21 @@ const assignmentStats = computed(() => {
   const assigned = assignmentsList.value.filter((i) => i.assigned_to).length;
   return { total, assigned, unassigned: total - assigned };
 });
+
 watch(showIncidentModal, (newVal) => {
-  // When modal closes AND we have incident details
   if (!newVal && incidentDetails.value) {
     const updated = incidentDetails.value;
-    // Update the incident in the main list
     const idx = allIncidents.value.findIndex(i => i.id === updated.id);
     if (idx !== -1) {
-      // Merge fresh data (including assigned_to) into the list
       allIncidents.value[idx] = { ...allIncidents.value[idx], ...updated };
     }
-    // Also update the assignments list if present
     const aidx = assignmentsList.value.findIndex(i => i.id === updated.id);
     if (aidx !== -1) {
       assignmentsList.value[aidx] = { ...assignmentsList.value[aidx], ...updated };
     }
   }
 });
+
 const exportAssignments = () => {
   const data = assignmentsList.value;
   if (!data?.length) {
@@ -553,8 +575,8 @@ const analyticsData = ref({
   incidentsByType: [],
   severityDistribution: [],
   activitySummary: { daily: [], weekly: [], monthly: [] },
-  vehicleTypes: [],      // <-- add this
-  barangayTrends: [],    // <-- add this
+  vehicleTypes: [],
+  barangayTrends: [],
 });
 const analyticsStartDate = ref(new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
 const analyticsEndDate = ref(new Date().toISOString().slice(0, 10));
@@ -565,11 +587,8 @@ const analyticsDataEnhanced = ref({
   avgResolutionHours: 0,
 });
 
-// Aggregate vehicle data from all analyses
 const vehicleSummary = computed(() => {
   if (!incidentDetails.value) return null;
-
-  // Helper to safely parse JSON
   const safeParse = (data) => {
     if (!data) return null;
     if (typeof data === 'object') return data;
@@ -582,14 +601,11 @@ const vehicleSummary = computed(() => {
     }
     return null;
   };
-
   const textAnalysis = safeParse(incidentDetails.value.text_analysis);
   const imageAnalysis = safeParse(incidentDetails.value.image_analysis);
   const videoAnalysis = safeParse(incidentDetails.value.video_analysis);
 
   let textVehicles = textAnalysis?.mentioned_vehicles || [];
-
-  // FALLBACK: If no vehicles from analysis, scan description directly
   if (textVehicles.length === 0 && incidentDetails.value.description) {
     const desc = incidentDetails.value.description.toLowerCase();
     const keywords = [
@@ -604,14 +620,12 @@ const vehicleSummary = computed(() => {
       'ambulance', 'fire truck', 'police car'
     ];
     const found = keywords.filter(kw => desc.includes(kw));
-    // Normalize to title case (e.g., "fire truck" -> "Fire Truck")
     textVehicles = found.map(kw => kw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '));
   }
 
   const imageVehicles = imageAnalysis?.vehicles || {};
   const videoVehicles = videoAnalysis?.vehicles || {};
 
-  // Aggregate counts
   const combined = {};
   textVehicles.forEach(v => { combined[v] = (combined[v] || 0) + 1; });
   Object.entries(imageVehicles).forEach(([k, v]) => { combined[k] = (combined[k] || 0) + v; });
@@ -631,8 +645,6 @@ const firstImage = computed(() => {
   if (!incidentDetails.value) return null;
   const paths = incidentDetails.value.image_paths;
   if (!paths) return null;
-  
-  // If it's a string, try to parse it as JSON
   let parsed = paths;
   if (typeof paths === 'string') {
     try {
@@ -641,8 +653,6 @@ const firstImage = computed(() => {
       return null;
     }
   }
-  
-  // If it's an array, return the first item
   if (Array.isArray(parsed) && parsed.length > 0) {
     return parsed[0];
   }
@@ -653,7 +663,6 @@ const firstVideo = computed(() => {
   if (!incidentDetails.value) return null;
   const paths = incidentDetails.value.video_paths;
   if (!paths) return null;
-  
   let parsed = paths;
   if (typeof paths === 'string') {
     try {
@@ -662,7 +671,6 @@ const firstVideo = computed(() => {
       return null;
     }
   }
-  
   if (Array.isArray(parsed) && parsed.length > 0) {
     return parsed[0];
   }
@@ -722,8 +730,8 @@ const loadAnalyticsData = async () => {
       incidentsByType: res.data.incidentsByType || [],
       severityDistribution: res.data.severityDistribution || [],
       activitySummary: res.data.activitySummary || { daily: [], weekly: [], monthly: [] },
-      vehicleTypes: res.data.vehicleTypes || [],          // ✅ already there
-      barangayTrends: res.data.barangayTrends || [],      // ✅ already there
+      vehicleTypes: res.data.vehicleTypes || [],
+      barangayTrends: res.data.barangayTrends || [],
     };
     analyticsDataEnhanced.value = {
       barangayDistribution: res.data.barangayDistribution || [],
@@ -733,7 +741,6 @@ const loadAnalyticsData = async () => {
     };
   } catch (error) {
     console.error("Failed to load analytics:", error);
-    // Set empty defaults to prevent render errors
     analyticsData.value.vehicleTypes = [];
     analyticsData.value.barangayTrends = [];
     showNotification("Failed to load analytics data", "error");
@@ -2057,45 +2064,30 @@ const go = async (section) => {
 // ============================================================
 //  AUTO REFRESH
 // ============================================================
-//
-// Use ONE timer for the entire Admin Dashboard instead of
-// seven independent timers.
-//
-// Every 30 seconds, only the currently active section is refreshed.
-//
-
 const refreshActiveSection = async () => {
   switch (active.value) {
     case "dashboard":
       await loadDashboardStats();
       break;
-
     case "incidents":
       await loadAllIncidents();
       break;
-
     case "users":
       await loadAllUsers();
       break;
-
     case "legal":
       await loadLegalCompliances();
       break;
-
     case "assignments":
       await loadAssignments();
       break;
-
     case "announcements":
       await loadAnnouncements();
       break;
-
     case "heatmap":
       await loadHeatmapData();
       break;
-
     default:
-      // Do not refresh sections that do not need automatic polling.
       break;
   }
 };
@@ -2131,6 +2123,36 @@ onBeforeUnmount(() => {
   if (drawMap) { drawMap.remove(); drawMap = null; }
   if (chatRefreshInterval) { clearInterval(chatRefreshInterval); chatRefreshInterval = null; }
 });
+
+// Pagination helpers (for incidents and assignments)
+const goToIncidentsPage = (page) => {
+  if (page >= 1 && page <= totalIncidentsPages.value) {
+    incidentsPagination.currentPage = page;
+  }
+};
+const nextIncidentsPage = () => {
+  if (incidentsPagination.currentPage < totalIncidentsPages.value) incidentsPagination.currentPage++;
+};
+const prevIncidentsPage = () => {
+  if (incidentsPagination.currentPage > 1) incidentsPagination.currentPage--;
+};
+
+const goToAssignmentsPage = (page) => {
+  if (page >= 1 && page <= totalAssignmentsPages.value) {
+    assignmentsPagination.currentPage = page;
+  }
+};
+const nextAssignmentsPage = () => {
+  if (assignmentsPagination.currentPage < totalAssignmentsPages.value) assignmentsPagination.currentPage++;
+};
+const prevAssignmentsPage = () => {
+  if (assignmentsPagination.currentPage > 1) assignmentsPagination.currentPage--;
+};
+
+// Watch filters to reset pagination
+watch(incidentsFilter, () => { incidentsPagination.currentPage = 1; });
+watch(assignmentsFilterResponder, () => { assignmentsPagination.currentPage = 1; });
+
 </script>
 
 <template>
@@ -2341,7 +2363,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- ============================================================
-          INCIDENTS
+          INCIDENTS (with pagination)
           ============================================================ -->
           <div v-else-if="active === 'incidents'" class="card">
             <div class="section-header">
@@ -2363,7 +2385,7 @@ onBeforeUnmount(() => {
                 <div>ID</div><div>Type</div><div>Severity</div><div>Location</div>
                 <div>Status</div><div>Reported</div><div>Assigned To</div><div>Actions</div>
               </div>
-              <div v-for="incident in allIncidents" :key="incident.id" class="row incidents-row">
+              <div v-for="incident in paginatedIncidents" :key="incident.id" class="row incidents-row">
                 <div>#{{ incident.id }}</div>
                 <div>{{ incident.type }}</div>
                 <div><span class="pill" :style="{ backgroundColor: severityColors[incident.severity] }">{{ incident.severity }}</span></div>
@@ -2388,161 +2410,161 @@ onBeforeUnmount(() => {
                 </div>
               </div>
             </div>
+
+            <!-- Pagination for incidents -->
+            <div v-if="totalIncidentsPages > 1" class="pagination">
+              <div class="pagination-info">
+                Showing {{ (incidentsPagination.currentPage - 1) * incidentsPagination.perPage + 1 }} to {{ Math.min(incidentsPagination.currentPage * incidentsPagination.perPage, incidentsPagination.total) }} of {{ incidentsPagination.total }} incidents
+              </div>
+              <div class="pagination-controls">
+                <button @click="prevIncidentsPage" :disabled="incidentsPagination.currentPage === 1" class="pagination-btn">← Previous</button>
+                <div class="page-numbers">
+                  <button v-for="page in getPageNumbers()" :key="page" @click="goToIncidentsPage(page)" :class="{ active: page === incidentsPagination.currentPage, dots: page === '...' }" class="page-btn" :disabled="page === '...'">{{ page }}</button>
+                </div>
+                <button @click="nextIncidentsPage" :disabled="incidentsPagination.currentPage === totalIncidentsPages" class="pagination-btn">Next →</button>
+              </div>
+            </div>
           </div>
 
           <!-- Incident Details Modal -->
-         <!-- Incident Details Modal -->
-<div v-if="showIncidentModal" class="modal-overlay" @click.self="showIncidentModal = false">
-  <div class="modal-content" style="max-width:700px;">
-    <div class="modal-header">
-      <h3>Incident Details</h3>
-      <button class="modal-close" @click="showIncidentModal = false">×</button>
-    </div>
-    <div class="modal-body">
-      <div v-if="loadingIncident" class="loading">Loading incident details...</div>
-      <div v-else-if="incidentDetails" class="incident-details">
-        <!-- Basic info -->
-        <div class="detail-row"><strong>ID:</strong> #{{ incidentDetails.id }}</div>
-        <div class="detail-row"><strong>Type:</strong> {{ incidentDetails.type }}</div>
-        <div class="detail-row"><strong>Severity:</strong> <span class="severity-badge" :class="incidentDetails.severity">{{ incidentDetails.severity }}</span></div>
-        <div class="detail-row"><strong>Status:</strong> <span class="status-badge" :class="incidentDetails.status">{{ incidentDetails.status }}</span></div>
-        <div class="detail-row"><strong>Location:</strong> {{ incidentDetails.barangay }}<br><small>{{ incidentDetails.address || 'No address provided' }}</small></div>
-        <div class="detail-row"><strong>Description:</strong><p>{{ incidentDetails.description }}</p></div>
-        <div class="detail-row"><strong>Reported by:</strong> {{ incidentDetails.reporter?.name || 'Anonymous' }} <span v-if="incidentDetails.reporter?.contact">({{ incidentDetails.reporter.contact }})</span></div>
-        <div class="detail-row"><strong>Reported at:</strong> {{ new Date(incidentDetails.created_at).toLocaleString() }}</div>
-        <div class="detail-row" v-if="incidentDetails.assigned_to"><strong>Assigned to:</strong> Responder ID {{ incidentDetails.assigned_to }}</div>
+          <div v-if="showIncidentModal" class="modal-overlay" @click.self="showIncidentModal = false">
+            <div class="modal-content" style="max-width:700px;">
+              <div class="modal-header">
+                <h3>Incident Details</h3>
+                <button class="modal-close" @click="showIncidentModal = false">×</button>
+              </div>
+              <div class="modal-body">
+                <div v-if="loadingIncident" class="loading">Loading incident details...</div>
+                <div v-else-if="incidentDetails" class="incident-details">
+                  <!-- Basic info -->
+                  <div class="detail-row"><strong>ID:</strong> #{{ incidentDetails.id }}</div>
+                  <div class="detail-row"><strong>Type:</strong> {{ incidentDetails.type }}</div>
+                  <div class="detail-row"><strong>Severity:</strong> <span class="severity-badge" :class="incidentDetails.severity">{{ incidentDetails.severity }}</span></div>
+                  <div class="detail-row"><strong>Status:</strong> <span class="status-badge" :class="incidentDetails.status">{{ incidentDetails.status }}</span></div>
+                  <div class="detail-row"><strong>Location:</strong> {{ incidentDetails.barangay }}<br><small>{{ incidentDetails.address || 'No address provided' }}</small></div>
+                  <div class="detail-row"><strong>Description:</strong><p>{{ incidentDetails.description }}</p></div>
+                  <div class="detail-row"><strong>Reported by:</strong> {{ incidentDetails.reporter?.name || 'Anonymous' }} <span v-if="incidentDetails.reporter?.contact">({{ incidentDetails.reporter.contact }})</span></div>
+                  <div class="detail-row"><strong>Reported at:</strong> {{ new Date(incidentDetails.created_at).toLocaleString() }}</div>
+                  <div class="detail-row" v-if="incidentDetails.assigned_to"><strong>Assigned to:</strong> Responder ID {{ incidentDetails.assigned_to }}</div>
 
-        <!-- AI Prediction (unchanged) -->
-        <div v-if="incidentDetails.text_analysis" class="detail-row">
-          <strong>🤖 AI Prediction:</strong>
-          <div>Type: {{ incidentDetails.text_analysis.incident_type }} ({{ (incidentDetails.text_analysis.type_confidence * 100).toFixed(0) }}%)</div>
-          <div>Severity: {{ incidentDetails.text_analysis.severity }} ({{ (incidentDetails.text_analysis.severity_confidence * 100).toFixed(0) }}%)</div>
-        </div>
+                  <!-- AI Prediction -->
+                  <div v-if="incidentDetails.text_analysis" class="detail-row">
+                    <strong>🤖 AI Prediction:</strong>
+                    <div>Type: {{ incidentDetails.text_analysis.incident_type }} ({{ (incidentDetails.text_analysis.type_confidence * 100).toFixed(0) }}%)</div>
+                    <div>Severity: {{ incidentDetails.text_analysis.severity }} ({{ (incidentDetails.text_analysis.severity_confidence * 100).toFixed(0) }}%)</div>
+                  </div>
 
-        <!-- ============================================================= -->
-        <!-- 🚗 NEW VEHICLE ANALYSIS REPORT (aggregated from text, images, video) -->
-        <!-- ============================================================= -->
-        <div v-if="vehicleSummary && vehicleSummary.total > 0" class="vehicle-analysis-section">
-          <h4>🚗 Vehicle Analysis Report</h4>
+                  <!-- Vehicle Analysis -->
+                  <div v-if="vehicleSummary && vehicleSummary.total > 0" class="vehicle-analysis-section">
+                    <h4>🚗 Vehicle Analysis Report</h4>
+                    <div class="vehicle-stats-row">
+                      <div class="vehicle-stat">
+                        <span class="stat-number">{{ vehicleSummary.total }}</span>
+                        <span class="stat-label">Total Vehicles Detected</span>
+                      </div>
+                      <div class="vehicle-stat">
+                        <span class="stat-number">{{ vehicleSummary.types.length }}</span>
+                        <span class="stat-label">Distinct Vehicle Types</span>
+                      </div>
+                      <div class="vehicle-stat" v-if="incidentDetails.text_analysis?.mentioned_vehicles?.length">
+                        <span class="stat-number">{{ incidentDetails.text_analysis.mentioned_vehicles.length }}</span>
+                        <span class="stat-label">Mentions in Text</span>
+                      </div>
+                      <div class="vehicle-stat" v-if="Object.keys(incidentDetails.image_analysis?.vehicles || {}).length">
+                        <span class="stat-number">{{ Object.values(incidentDetails.image_analysis.vehicles).reduce((a,b) => a+b, 0) }}</span>
+                        <span class="stat-label">Detected in Images</span>
+                      </div>
+                    </div>
 
-          <!-- Summary stats -->
-          <div class="vehicle-stats-row">
-            <div class="vehicle-stat">
-              <span class="stat-number">{{ vehicleSummary.total }}</span>
-              <span class="stat-label">Total Vehicles Detected</span>
-            </div>
-            <div class="vehicle-stat">
-              <span class="stat-number">{{ vehicleSummary.types.length }}</span>
-              <span class="stat-label">Distinct Vehicle Types</span>
-            </div>
-            <div class="vehicle-stat" v-if="incidentDetails.text_analysis?.mentioned_vehicles?.length">
-              <span class="stat-number">{{ incidentDetails.text_analysis.mentioned_vehicles.length }}</span>
-              <span class="stat-label">Mentions in Text</span>
-            </div>
-            <div class="vehicle-stat" v-if="Object.keys(incidentDetails.image_analysis?.vehicles || {}).length">
-              <span class="stat-number">{{ Object.values(incidentDetails.image_analysis.vehicles).reduce((a,b) => a+b, 0) }}</span>
-              <span class="stat-label">Detected in Images</span>
+                    <table class="vehicle-breakdown-table">
+                      <thead>
+                        <tr>
+                          <th>Vehicle Type</th>
+                          <th>Count</th>
+                          <th>Source</th>
+                          <th>Confidence (avg)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="item in vehicleSummary.types" :key="item.type">
+                          <td><span class="vehicle-type-badge">{{ item.type }}</span></td>
+                          <td><strong>{{ item.count }}</strong></td>
+                          <td>
+                            <span v-if="vehicleSummary.textMentions.includes(item.type)" class="source-tag">📝 Text</span>
+                            <span v-if="vehicleSummary.imageDetections[item.type]" class="source-tag">🖼️ Image</span>
+                            <span v-if="vehicleSummary.videoDetections[item.type]" class="source-tag">🎥 Video</span>
+                          </td>
+                          <td>
+                            <span v-if="incidentDetails.image_analysis?.objects">~0.80</span>
+                            <span v-else>–</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <details class="vehicle-source-details">
+                      <summary>📄 View raw detection details</summary>
+                      <div v-if="incidentDetails.text_analysis?.mentioned_vehicles?.length" class="source-block">
+                        <strong>From text:</strong> {{ incidentDetails.text_analysis.mentioned_vehicles.join(', ') }}
+                      </div>
+                      <div v-if="Object.keys(incidentDetails.image_analysis?.vehicles || {}).length" class="source-block">
+                        <strong>From images:</strong>
+                        <ul>
+                          <li v-for="(count, type) in incidentDetails.image_analysis.vehicles" :key="type">
+                            {{ type }}: {{ count }}
+                          </li>
+                        </ul>
+                      </div>
+                      <div v-if="Object.keys(incidentDetails.video_analysis?.vehicles || {}).length" class="source-block">
+                        <strong>From video:</strong>
+                        <ul>
+                          <li v-for="(count, type) in incidentDetails.video_analysis.vehicles" :key="type">
+                            {{ type }}: {{ count }}
+                          </li>
+                        </ul>
+                      </div>
+                    </details>
+                  </div>
+                  <div v-else-if="incidentDetails" class="vehicle-analysis-section no-data">
+                    <p>No vehicle data available for this incident.</p>
+                  </div>
+
+                  <!-- Detected objects in images -->
+                  <div v-if="incidentDetails.image_analysis && incidentDetails.image_analysis.objects && incidentDetails.image_analysis.objects.length" class="detail-row">
+                    <strong>🖼️ Detected objects in images:</strong>
+                    <div><span v-for="obj in incidentDetails.image_analysis.objects.slice(0,5)" :key="obj.label" style="display:inline-block;background:#f3f4f6;padding:2px 8px;border-radius:12px;margin-right:8px;margin-top:4px;">{{ obj.label }} ({{ (obj.confidence * 100).toFixed(0) }}%)</span></div>
+                  </div>
+
+                  <!-- Video analysis summary -->
+                  <div v-if="incidentDetails.video_analysis && incidentDetails.video_analysis.summary && incidentDetails.video_analysis.summary.length" class="detail-row">
+                    <strong>🎥 Video analysis:</strong>
+                    <div><span v-for="item in incidentDetails.video_analysis.summary" :key="item.label" style="display:inline-block;background:#e0e7ff;padding:2px 8px;border-radius:12px;margin-right:8px;margin-top:4px;">{{ item.label }} ({{ item.count }} times)</span></div>
+                  </div>
+
+                  <!-- Images & videos -->
+                  <div v-if="firstImage" class="detail-row">
+                    <strong>📷 Image:</strong>
+                    <div style="margin-top:6px;">
+                      <img :src="getFullImageUrl(firstImage)" style="max-width:100%;max-height:250px;border-radius:8px;" @error="console.error('❌ Image failed to load:', getFullImageUrl(firstImage))" />
+                    </div>
+                  </div>
+
+                  <div v-if="firstVideo" class="detail-row">
+                    <strong>🎥 Video:</strong>
+                    <div style="margin-top:6px;">
+                      <video controls :src="getFullImageUrl(firstVideo)" style="max-width:100%;border-radius:8px;"></video>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button v-if="incidentDetails?.status === 'pending'" class="btn btn-success" @click="approveIncidentFromModal">✅ Approve</button>
+                <button v-else-if="incidentDetails?.status === 'in-progress'" class="btn btn-primary" @click="resolveIncidentFromModal">✓ Resolve</button>
+                <button class="btn btn-danger" @click="declineIncident">🗑️ Decline & Delete</button>
+                <button class="btn btn-outline" @click="showIncidentModal = false">Close</button>
+              </div>
             </div>
           </div>
-
-          <!-- Breakdown table -->
-          <table class="vehicle-breakdown-table">
-            <thead>
-              <tr>
-                <th>Vehicle Type</th>
-                <th>Count</th>
-                <th>Source</th>
-                <th>Confidence (avg)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in vehicleSummary.types" :key="item.type">
-                <td><span class="vehicle-type-badge">{{ item.type }}</span></td>
-                <td><strong>{{ item.count }}</strong></td>
-                <td>
-                  <span v-if="vehicleSummary.textMentions.includes(item.type)" class="source-tag">📝 Text</span>
-                  <span v-if="vehicleSummary.imageDetections[item.type]" class="source-tag">🖼️ Image</span>
-                  <span v-if="vehicleSummary.videoDetections[item.type]" class="source-tag">🎥 Video</span>
-                </td>
-                <td>
-                  <!-- Placeholder – you can compute average confidence from image/video objects if available -->
-                  <span v-if="incidentDetails.image_analysis?.objects">~0.80</span>
-                  <span v-else>–</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- Raw details (expandable) -->
-          <details class="vehicle-source-details">
-            <summary>📄 View raw detection details</summary>
-            <div v-if="incidentDetails.text_analysis?.mentioned_vehicles?.length" class="source-block">
-              <strong>From text:</strong> {{ incidentDetails.text_analysis.mentioned_vehicles.join(', ') }}
-            </div>
-            <div v-if="Object.keys(incidentDetails.image_analysis?.vehicles || {}).length" class="source-block">
-              <strong>From images:</strong>
-              <ul>
-                <li v-for="(count, type) in incidentDetails.image_analysis.vehicles" :key="type">
-                  {{ type }}: {{ count }}
-                </li>
-              </ul>
-            </div>
-            <div v-if="Object.keys(incidentDetails.video_analysis?.vehicles || {}).length" class="source-block">
-              <strong>From video:</strong>
-              <ul>
-                <li v-for="(count, type) in incidentDetails.video_analysis.vehicles" :key="type">
-                  {{ type }}: {{ count }}
-                </li>
-              </ul>
-            </div>
-          </details>
-        </div>
-        <div v-else-if="incidentDetails" class="vehicle-analysis-section no-data">
-          <p>No vehicle data available for this incident.</p>
-        </div>
-        <!-- ============================================================= -->
-        <!-- END OF VEHICLE ANALYSIS SECTION                               -->
-        <!-- ============================================================= -->
-
-        <!-- 👇 The old vehicle rows ("Mentioned vehicles (text)" and "Detected vehicles (images/video)") have been REMOVED -->
-
-        <!-- Detected objects in images (kept) -->
-        <div v-if="incidentDetails.image_analysis && incidentDetails.image_analysis.objects && incidentDetails.image_analysis.objects.length" class="detail-row">
-          <strong>🖼️ Detected objects in images:</strong>
-          <div><span v-for="obj in incidentDetails.image_analysis.objects.slice(0,5)" :key="obj.label" style="display:inline-block;background:#f3f4f6;padding:2px 8px;border-radius:12px;margin-right:8px;margin-top:4px;">{{ obj.label }} ({{ (obj.confidence * 100).toFixed(0) }}%)</span></div>
-        </div>
-
-        <!-- Video analysis summary (kept) -->
-        <div v-if="incidentDetails.video_analysis && incidentDetails.video_analysis.summary && incidentDetails.video_analysis.summary.length" class="detail-row">
-          <strong>🎥 Video analysis:</strong>
-          <div><span v-for="item in incidentDetails.video_analysis.summary" :key="item.label" style="display:inline-block;background:#e0e7ff;padding:2px 8px;border-radius:12px;margin-right:8px;margin-top:4px;">{{ item.label }} ({{ item.count }} times)</span></div>
-        </div>
-
-        <!-- Images & videos -->
-        <div v-if="firstImage" class="detail-row">
-          <strong>📷 Image:</strong>
-          <div style="margin-top:6px;">
-            <img :src="getFullImageUrl(firstImage)" style="max-width:100%;max-height:250px;border-radius:8px;" @error="console.error('❌ Image failed to load:', getFullImageUrl(firstImage))" />
-          </div>
-        </div>
-
-        <div v-if="firstVideo" class="detail-row">
-          <strong>🎥 Video:</strong>
-          <div style="margin-top:6px;">
-            <video controls :src="getFullImageUrl(firstVideo)" style="max-width:100%;border-radius:8px;"></video>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Modal actions (unchanged) -->
-    <div class="modal-actions">
-      <button v-if="incidentDetails?.status === 'pending'" class="btn btn-success" @click="approveIncidentFromModal">✅ Approve</button>
-      <button v-else-if="incidentDetails?.status === 'in-progress'" class="btn btn-primary" @click="resolveIncidentFromModal">✓ Resolve</button>
-      <button class="btn btn-danger" @click="declineIncident">🗑️ Decline & Delete</button>
-      <button class="btn btn-outline" @click="showIncidentModal = false">Close</button>
-    </div>
-  </div>
-</div>
 
           <!-- ============================================================
           HEATMAP
@@ -2687,7 +2709,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Barangay Incident Trends (Today, Week, Month) -->
+              <!-- Barangay Incident Trends -->
               <div class="chart-card full-width">
                 <h3>📍 Top Barangays by Incident Volume</h3>
                 <div class="barangay-trend-chart">
@@ -2711,7 +2733,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- ============================================================
-          ASSIGNMENTS
+          ASSIGNMENTS (with pagination)
           ============================================================ -->
           <div v-else-if="active === 'assignments'" class="card">
             <h2 class="h2">📋 Incident Assignments</h2>
@@ -2740,7 +2762,7 @@ onBeforeUnmount(() => {
                   <div>ID</div><div>Type</div><div>Severity</div><div>Location</div>
                   <div>Status</div><div>Assigned To</div><div>Actions</div>
                 </div>
-                <div v-for="incident in assignmentsList" :key="incident.id" class="row assignments-row">
+                <div v-for="incident in paginatedAssignments" :key="incident.id" class="row assignments-row">
                   <div>#{{ incident.id }}</div>
                   <div>{{ incident.type }}</div>
                   <div><span class="pill" :style="{ backgroundColor: severityColors[incident.severity] }">{{ incident.severity }}</span></div>
@@ -2752,7 +2774,7 @@ onBeforeUnmount(() => {
                       :key="incident.id" 
                       :value="incident.assigned_to ?? null" 
                       @change="assignToResponder(incident.id, $event.target.value)" 
-                      class="responder-select"a
+                      class="responder-select"
                     >
                       <option :value="null">Unassign</option>
                       <option v-for="resp in availableResponders" :key="resp.id" :value="resp.id">{{ resp.name }}</option>
@@ -2764,6 +2786,20 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
                 <div v-if="assignmentsList.length === 0 && !assignmentsLoading" class="no-data">No incidents match the filter.</div>
+              </div>
+            </div>
+
+            <!-- Pagination for assignments -->
+            <div v-if="totalAssignmentsPages > 1" class="pagination">
+              <div class="pagination-info">
+                Showing {{ (assignmentsPagination.currentPage - 1) * assignmentsPagination.perPage + 1 }} to {{ Math.min(assignmentsPagination.currentPage * assignmentsPagination.perPage, assignmentsPagination.total) }} of {{ assignmentsPagination.total }} assignments
+              </div>
+              <div class="pagination-controls">
+                <button @click="prevAssignmentsPage" :disabled="assignmentsPagination.currentPage === 1" class="pagination-btn">← Previous</button>
+                <div class="page-numbers">
+                  <button v-for="page in getPageNumbers()" :key="page" @click="goToAssignmentsPage(page)" :class="{ active: page === assignmentsPagination.currentPage, dots: page === '...' }" class="page-btn" :disabled="page === '...'">{{ page }}</button>
+                </div>
+                <button @click="nextAssignmentsPage" :disabled="assignmentsPagination.currentPage === totalAssignmentsPages" class="pagination-btn">Next →</button>
               </div>
             </div>
           </div>
@@ -5803,8 +5839,6 @@ textarea.form-input {
   padding: 0.5rem 0;
 }
 
-/* Vehicle types bar chart (reuses .bar-chart) */
-
 /* Barangay trend chart */
 .barangay-trend-chart {
   display: flex;
@@ -5838,13 +5872,13 @@ textarea.form-input {
 }
 
 .trend-bar.today {
-  background: #3b82f6; /* blue */
+  background: #3b82f6;
 }
 .trend-bar.week {
-  background: #f59e0b; /* amber */
+  background: #f59e0b;
 }
 .trend-bar.month {
-  background: #10b981; /* green */
+  background: #10b981;
 }
 
 .trend-label {
@@ -5879,9 +5913,4 @@ textarea.form-input {
 .legend-dot.week { background: #f59e0b; }
 .legend-dot.month { background: #10b981; }
 
-.no-data {
-  text-align: center;
-  color: #6b7280;
-  padding: 1rem 0;
-}
 </style>
