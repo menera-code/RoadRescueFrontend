@@ -1,71 +1,110 @@
 import { createRouter, createWebHistory } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
 
+// Public pages
 import LandingView from "@/views/LandingView.vue"
 import LoginView from "@/views/LoginView.vue"
 import RegisterView from "@/views/RegisterView.vue"
 import HomeView from "@/views/HomeView.vue"
-import EmergencySOSView from "@/views/EmergencySOS.vue"; // NEW: SOS button view
+import EmergencySOSView from "@/views/EmergencySOS.vue"
 
-import UserDashboardView from "@/views/dashboards/UserDashboardView.vue"
-import ResponderDashboardView from "@/views/dashboards/ResponderDashboardView.vue"
-import AdminDashboardView from "@/views/dashboards/AdminDashboardView.vue"
-import { jwtDecode } from "jwt-decode"
+// Dashboard pages are lazy-loaded.
+// This prevents all dashboard code from loading when the user
+// first opens the website.
+const UserDashboardView = () =>
+  import("@/views/dashboards/UserDashboardView.vue")
 
+const ResponderDashboardView = () =>
+  import("@/views/dashboards/ResponderDashboardView.vue")
+
+const AdminDashboardView = () =>
+  import("@/views/dashboards/AdminDashboardView.vue")
 
 const routes = [
-  { path: "/", component: LandingView },
-  { path: "/login", component: LoginView },
-  { path: "/register", component: RegisterView },
-  { path: "/sos", component: EmergencySOSView }, // No auth required
- 
+  {
+    path: "/",
+    name: "landing",
+    component: LandingView,
+  },
+
+  {
+    path: "/login",
+    name: "login",
+    component: LoginView,
+  },
+
+  {
+    path: "/register",
+    name: "register",
+    component: RegisterView,
+  },
+
+  {
+    path: "/sos",
+    name: "sos",
+    component: EmergencySOSView,
+  },
+
   {
     path: "/home",
+    name: "home",
     component: HomeView,
-    meta: { requiresAuth: true }
-  },// inside routes: []
-{
-  path: "/dashboard/user",
-  name: "dashboard-user",
-  component: UserDashboardView,
-},
-{
-  path: "/dashboard/responder",
-  name: "dashboard-responder",
-  component: ResponderDashboardView,
-},
-{
-  path: "/dashboard/admin",
-  name: "dashboard-admin",
-  component: AdminDashboardView,
-},
+    meta: {
+      requiresAuth: true,
+    },
+  },
+
+  {
+    path: "/dashboard/user",
+    name: "dashboard-user",
+    component: UserDashboardView,
+    meta: {
+      requiresAuth: true,
+      role: "user",
+    },
+  },
+
+  {
+    path: "/dashboard/responder",
+    name: "dashboard-responder",
+    component: ResponderDashboardView,
+    meta: {
+      requiresAuth: true,
+      role: "responder",
+    },
+  },
+
+  {
+    path: "/dashboard/admin",
+    name: "dashboard-admin",
+    component: AdminDashboardView,
+    meta: {
+      requiresAuth: true,
+      role: "admin",
+    },
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 })
 
+// Navigation guard
 router.beforeEach((to) => {
   const auth = useAuthStore()
 
-  // If logged in, prevent going back to public pages
-  if (
-    auth.isAuthenticated &&
-    (to.path === "/" || to.path === "/login" || to.path === "/register")
-  ) {
-    
-  }
-
-  // Protect private pages
+  // Protect private routes
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return "/login"
+    return {
+      path: "/login",
+      query: {
+        redirect: to.fullPath,
+      },
+    }
   }
 
   return true
 })
-
-
-
 
 export default router
