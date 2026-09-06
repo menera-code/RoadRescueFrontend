@@ -1,45 +1,141 @@
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import {
+  ref,
+  isRef,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+} from "vue"
 
 export function useAutoRefresh({
-  refreshFn,         // async function that fetches data and updates refs
-  interval = 5000,  // milliseconds
-  enabled = true,    // reactive boolean (e.g., active tab check)
+  refreshFn,
+  interval = 15000,
+  enabled = true,
+
   preserveScroll = true,
-  scrollContainerSelector = '.table-container, .reports-table-container, .users-table-container',
+
+  scrollContainerSelector =
+    ".table-container, .reports-table-container, .users-table-container",
+
   preserveMap = true,
-  mapRef = null,     // pass map instance ref
+  mapRef = null,
+
+  immediate = false,
 }) {
+  const isRefreshing = ref(false)
+
   let timer = null
-  let isRefreshing = ref(false)
+
+  let mounted = false
+
+  /*
+   * ----------------------------------------------------------
+   * Get current enabled state
+   * ----------------------------------------------------------
+   *
+   * Supports both:
+   *
+   * enabled: true
+   *
+   * and:
+   *
+   * enabled: computed(() => ...)
+   */
+  const getEnabled = () => {
+    return isRef(enabled) ? enabled.value : enabled
+  }
+
+  /*
+   * ----------------------------------------------------------
+   * Scroll position
+   * ----------------------------------------------------------
+   */
 
   const saveScrollPosition = () => {
-    if (!preserveScroll) return 0
-    const container = document.querySelector(scrollContainerSelector)
+    if (!preserveScroll) {
+      return 0
+    }
+
+    const container = document.querySelector(
+      scrollContainerSelector
+    )
+
     return container?.scrollTop || 0
   }
 
   const restoreScrollPosition = (scrollTop) => {
-    if (!preserveScroll) return
-    const container = document.querySelector(scrollContainerSelector)
-    if (container) container.scrollTop = scrollTop
+    if (!preserveScroll) {
+      return
+    }
+
+    const container = document.querySelector(
+      scrollContainerSelector
+    )
+
+    if (container) {
+      container.scrollTop = scrollTop
+    }
   }
 
+  /*
+   * ----------------------------------------------------------
+   * Leaflet map position
+   * ----------------------------------------------------------
+   */
+
   const saveMapView = () => {
-    if (!preserveMap || !mapRef?.value) return null
-    return {
-      center: mapRef.value.getCenter(),
-      zoom: mapRef.value.getZoom()
+    if (!preserveMap || !mapRef?.value) {
+      return null
+    }
+
+    try {
+      return {
+        center: mapRef.value.getCenter(),
+        zoom: mapRef.value.getZoom(),
+      }
+    } catch (error) {
+      console.warn("Could not save map view:", error)
+      return null
     }
   }
 
   const restoreMapView = (view) => {
-    if (!preserveMap || !mapRef?.value || !view) return
-    mapRef.value.setView(view.center, view.zoom)
+    if (!preserveMap || !mapRef?.value || !view) {
+      return
+    }
+
+    try {
+      mapRef.value.setView(view.center, view.zoom, {
+        animate: false,
+      })
+    } catch (error) {
+      console.warn("Could not restore map view:", error)
+    }
   }
 
+  /*
+   * ----------------------------------------------------------
+   * Refresh
+   * ----------------------------------------------------------
+   */
+
   const refresh = async () => {
-    if (!enabled) return
-    if (isRefreshing.value) return
+    if (!getEnabled()) {
+      return
+    }
+
+    // Prevent duplicate/overlapping refresh requests.
+    if (isRefreshing.value) {
+      return
+    }
+
+    if (typeof refreshFn !== "function") {
+      console.warn(
+        "useAutoRefresh: refreshFn must be a function."
+      )
+
+      return
+    }
+
     isRefreshing.value = true
 
     const scrollTop = saveScrollPosition()
@@ -47,31 +143,109 @@ export function useAutoRefresh({
 
     try {
       await refreshFn()
-    } catch (err) {
-      console.warn('Auto-refresh failed:', err)
+    } catch (error) {
+      console.warn(
+        "Auto-refresh request failed:",
+        error
+      )
     } finally {
       restoreScrollPosition(scrollTop)
       restoreMapView(mapView)
+
       isRefreshing.value = false
     }
   }
 
+  /*
+   * ----------------------------------------------------------
+   * Start timer
+   * ----------------------------------------------------------
+   */
+
   const start = () => {
-    if (timer) clearInterval(timer)
-    if (!enabled) return
-    timer = setInterval(refresh, interval)
+    stop()
+
+    if (!mounted) {
+      return
+    }
+
+    if (!getEnabled()) {
+      return
+    }
+
+    /*
+     * 15 seconds is intentionally used instead of 5 seconds.
+     *
+     * Emergency actions should still trigger their own
+     * immediate refresh when needed.
+     */
+    timer = window.setInterval(() => {
+      refresh()
+    }, interval)
   }
+
+  /*
+   * ----------------------------------------------------------
+   * Stop timer
+   * ----------------------------------------------------------
+   */
 
   const stop = () => {
-    if (timer) clearInterval(timer)
-    timer = null
+    if (timer !== null) {
+      window.clearInterval(timer)
+      timer = null
+    }
   }
 
-  onMounted(() => start())
-  onBeforeUnmount(() => stop())
+  /*
+   * ----------------------------------------------------------
+   * Lifecycle
+   * ----------------------------------------------------------
+   */
 
-  // Re-start if enabled changes
-  // (you can watch enabled and call start/stop)
+  onMounted(() => {
+    mounted = true
 
-  return { isRefreshing, refresh }
+    if (immediate) {
+      refresh()
+    }
+
+    start()
+  })
+
+  onBeforeUnmount(() => {
+    mounted = false
+    stop()
+  })
+
+  /*
+   * ----------------------------------------------------------
+   * Watch reactive enabled state
+   * ----------------------------------------------------------
+   *
+   * This fixes the problem in the original implementation.
+   */
+
+  if (isRef(enabled)) {
+    watch(
+      enabled,
+      (newValue) => {
+        if (newValue) {
+          start()
+        } else {
+          stop()
+        }
+      },
+      {
+        flush: "post",
+      }
+    )
+  }
+
+  return {
+    isRefreshing,
+    refresh,
+    start,
+    stop,
+  }
 }
