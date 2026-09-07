@@ -3,11 +3,9 @@ import { ref } from "vue"
 import { useRouter } from "vue-router"
 import { useAuthStore } from "@/stores/auth"
 import calapanLogo from "@/assets/logos/calapan.png"
-import axios from "axios"
-import { jwtDecode } from "jwt-decode"
-import api from "@/api/client"
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const email = ref("")
 const password = ref("")
@@ -24,24 +22,18 @@ const submit = async () => {
   loading.value = true
 
   try {
-    const res = await api.post("/auth/login", {
-      email: email.value,
-      password: password.value,
-    })
+    // 1. Call the store's login action – it stores the token and fetches the user
+    await auth.login(email.value, password.value)
 
-    const token = res.data.access_token
-    localStorage.setItem("access_token", token)
+    // 2. Now auth.user contains the full user object (including role)
+    const role = auth.user?.role
 
-    const decoded = jwtDecode(token)
-    const role = decoded.role
-
-    if (role === "admin") {
-      router.push("/dashboard/admin")
-    } else if (role === "responder") {
-      router.push("/dashboard/responder")
-    } else {
-      router.push("/dashboard/user")
+    // 3. Redirect based on role
+    const routes = {
+      admin: "/dashboard/admin",
+      responder: "/dashboard/responder",
     }
+    router.push(routes[role] || "/dashboard/user")
   } catch (err) {
     error.value = "Invalid email or password"
   } finally {
