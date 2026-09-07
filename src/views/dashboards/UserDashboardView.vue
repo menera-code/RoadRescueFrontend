@@ -56,7 +56,12 @@ const go = async (key) => {
   switch (key) {
     case "map":
       initMap()
-      invalidateSoon()
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 300);
+      setTimeout(() => {
+        if (map) map.invalidateSize();
+      }, 600);
       break
     case "report":
       await useCurrentLocationForReport()
@@ -4331,7 +4336,7 @@ onBeforeUnmount(() => {
   min-height: 0; 
     display: flex;
   flex-direction: column;
-   overflow: hidden; 
+   overflow: visible; 
 }
 
 .layout {
@@ -4424,13 +4429,13 @@ onBeforeUnmount(() => {
   flex: 1;
   overflow-y: auto; 
   min-width: 0;
-  margin-top: -200px;
+  margin-top: 0;
   
 }
 /* Optional: if you have any Leaflet controls that still peek, increase further */
 .leaflet-pane,
 .leaflet-control {
-  z-index: 500 !important;         /* force them lower (use cautiously) */
+  z-index: 1000 !important;         /* force them lower (use cautiously) */
 }
 }
 
@@ -6289,4 +6294,12 @@ textarea {
   background: #e0e7ff;
   transform: translateY(-1px);
 }
+
+#user-map,
+#incident-map,
+#alert-map,
+#location-picker-map {
+  touch-action: none;        /* prevents scroll interference */
+}
+
 </style>
