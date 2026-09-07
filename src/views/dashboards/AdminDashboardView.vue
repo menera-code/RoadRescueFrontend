@@ -747,6 +747,87 @@ const loadAnalyticsData = async () => {
   }
 };
 
+// ============================================================
+//  EXPORT ANALYTICS TO CSV (Excel)
+// ============================================================
+const exportAnalyticsToCSV = () => {
+  const rows = [];
+
+  // Header with report title and date range
+  rows.push(['Analytics Report', `Generated: ${new Date().toLocaleString()}`]);
+  rows.push(['Date Range', `${analyticsStartDate.value} to ${analyticsEndDate.value}`]);
+  rows.push([]); // blank line
+
+  // 1. Incidents by Type
+  rows.push(['Incidents by Type']);
+  rows.push(['Type', 'Count']);
+  analyticsData.value.incidentsByType.forEach(item => {
+    rows.push([item.name, item.count]);
+  });
+  rows.push([]);
+
+  // 2. Severity Distribution
+  rows.push(['Severity Distribution']);
+  rows.push(['Severity', 'Count']);
+  analyticsData.value.severityDistribution.forEach(item => {
+    rows.push([item.level, item.count]);
+  });
+  rows.push([]);
+
+  // 3. Barangay Distribution
+  rows.push(['Barangay Distribution']);
+  rows.push(['Barangay', 'Count']);
+  analyticsDataEnhanced.value.barangayDistribution.forEach(item => {
+    rows.push([item.barangay, item.count]);
+  });
+  rows.push([]);
+
+  // 4. Daily Activity (last 7 days)
+  rows.push(['Daily Activity (Last 7 Days)']);
+  rows.push(['Date', 'Activity']);
+  analyticsData.value.activitySummary.daily.slice(0, 7).forEach(item => {
+    rows.push([item.date, item.activity]);
+  });
+  rows.push([]);
+
+  // 5. Weekly Trend (last 4 weeks)
+  rows.push(['Weekly Trend (Last 4 Weeks)']);
+  rows.push(['Week', 'Count']);
+  analyticsDataEnhanced.value.weeklyTrend.slice(0, 4).forEach(item => {
+    rows.push([item.week, item.count]);
+  });
+  rows.push([]);
+
+  // 6. Hourly Distribution
+  rows.push(['Hourly Distribution']);
+  rows.push(['Hour', 'Count']);
+  analyticsDataEnhanced.value.hourlyDistribution.forEach(item => {
+    rows.push([`${item.hour}:00`, item.count]);
+  });
+  rows.push([]);
+
+  // 7. Vehicle Types Detected
+  rows.push(['Vehicle Types Detected']);
+  rows.push(['Type', 'Count']);
+  analyticsData.value.vehicleTypes.forEach(item => {
+    rows.push([item.type, item.count]);
+  });
+
+  // Build CSV string (with BOM for UTF‑8 in Excel)
+  const csvContent = rows.map(row => row.join(',')).join('\n');
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = `analytics_report_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showNotification('Analytics report exported successfully', 'success');
+};
+
 const formatDate = (dateStr) => {
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-US", { weekday: "short" });
@@ -2610,6 +2691,7 @@ watch(assignmentsFilterResponder, () => { assignmentsPagination.currentPage = 1;
               <div class="form-group"><label class="filter-label">From</label><input type="date" v-model="analyticsStartDate" class="filter-select" style="width:auto;" /></div>
               <div class="form-group"><label class="filter-label">To</label><input type="date" v-model="analyticsEndDate" class="filter-select" style="width:auto;" /></div>
               <button class="btn btn-outline-blue btn-sm" @click="loadAnalyticsData">🔄 Refresh</button>
+              <button class="btn btn-primary btn-sm" @click="exportAnalyticsToCSV">📊 Export Report</button>
             </div>
 
             <div class="summary-cards">
