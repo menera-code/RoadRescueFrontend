@@ -1,4 +1,3 @@
-
 <script setup>
 // ============================================================
 //  IMPORTS
@@ -38,6 +37,18 @@ const roleClass = computed(() => "role-user")
 const token = localStorage.getItem("access_token")
 const windowWidth = ref(0)
 const mobileMenuOpen = ref(false)
+
+/* Shared nav model for desktop sidebar + mobile bottom bar */
+const navItems = [
+  { key: "overview",      icon: "◈", label: "Overview" },
+  { key: "report",        icon: "⚠", label: "Report"   },
+  { key: "map",           icon: "◎", label: "Map"      },
+  { key: "myreports",     icon: "▤", label: "Reports"  },
+  { key: "announcements", icon: "◔", label: "Alerts"   },
+  { key: "chat",          icon: "✦", label: "Chat"     },
+  { key: "legal",         icon: "§", label: "Legal"    },
+  { key: "profile",       icon: "◉", label: "Profile"  },
+]
 
 const logout = async () => {
   try {
@@ -195,8 +206,8 @@ const loadingReportDetails = ref(false)
 const reportSearchQuery = ref("")
 const reportStatusFilter = ref("all")
 
-const incidentRouteData = ref(null)               // store route geometry and duration
-let incidentRouteLayer = null                     // Leaflet layer for the route
+const incidentRouteData = ref(null)
+let incidentRouteLayer = null
 const severityColors = {
   critical: "#dc2626",
   high: "#f59e0b",
@@ -243,13 +254,11 @@ const loadMyReports = async () => {
   }
 }
 
-// Incident detail map
 let incidentMapInstance = null
 let incidentMapMarkers = []
 let responderLocationInterval = null
 
 const etaText = (incident) => {
-  // If we have route data, use its duration
   if (incidentRouteData.value?.duration) {
     const seconds = incidentRouteData.value.duration
     const mins = Math.ceil(seconds / 60)
@@ -259,7 +268,6 @@ const etaText = (incident) => {
     const remMins = mins % 60
     return `${hours}h ${remMins}m`
   }
-  // Fallback: straight‑line distance
   if (!incident?.responderLocation) return 'N/A'
   const dist = haversineDistance(
     incident.latitude,
@@ -290,7 +298,7 @@ const fetchRouteForIncident = async (startLat, startLng, endLat, endLng) => {
       start_lng: startLng,
       dest_lat: endLat,
       dest_lng: endLng,
-      profile: 'driving'   // use 'foot' if needed
+      profile: 'driving'
     })
     if (response.data.success && response.data.geometry) {
       incidentRouteData.value = {
@@ -310,12 +318,10 @@ const fetchRouteForIncident = async (startLat, startLng, endLat, endLng) => {
 
 const drawRouteOnMap = (routeData) => {
   if (!incidentMapInstance || !routeData?.geometry) return
-  // Remove any existing route layer
   if (incidentRouteLayer) {
     incidentMapInstance.removeLayer(incidentRouteLayer)
     incidentRouteLayer = null
   }
-  // Add the new route
   incidentRouteLayer = L.geoJSON(routeData.geometry, {
     style: {
       color: '#f97316',
@@ -343,7 +349,6 @@ const initIncidentMap = (retries = 3) => {
     return
   }
 
-  // Destroy previous instance
   if (incidentMapInstance) {
     incidentMapInstance.remove()
     incidentMapInstance = null
@@ -361,7 +366,6 @@ const initIncidentMap = (retries = 3) => {
     return
   }
 
-  // Fix Leaflet icons
   delete L.Icon.Default.prototype._getIconUrl
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -380,7 +384,6 @@ const initIncidentMap = (retries = 3) => {
     attribution: "&copy; OpenStreetMap contributors",
   }).addTo(incidentMapInstance)
 
-  // Incident marker
   const incidentIcon = L.divIcon({
     className: "custom-marker",
     html: '<div style="background:#dc2626;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px #dc2626;"></div>',
@@ -392,7 +395,6 @@ const initIncidentMap = (retries = 3) => {
     .bindPopup("Incident location")
     .openPopup()
 
-  // User location
   if (userLoc && userLoc.lat && userLoc.lng) {
     const userIcon = L.divIcon({
       className: "custom-marker",
@@ -405,7 +407,6 @@ const initIncidentMap = (retries = 3) => {
       .bindPopup("Your current location")
   }
 
-  // Responder location
   if (respLoc && respLoc.lat && respLoc.lng) {
     const respIcon = L.divIcon({
       className: "custom-marker",
@@ -417,7 +418,6 @@ const initIncidentMap = (retries = 3) => {
       .addTo(incidentMapInstance)
       .bindPopup(`Responder (last update: ${new Date(respLoc.updated_at).toLocaleTimeString()})`)
 
-    // 👉 NOW fetch the road route
     fetchRouteForIncident(
       respLoc.lat,
       respLoc.lng,
@@ -426,7 +426,6 @@ const initIncidentMap = (retries = 3) => {
     )
   }
 
-  // Fit bounds
   const latlngs = []
   if (incident.latitude && incident.longitude) latlngs.push([incident.latitude, incident.longitude])
   if (userLoc?.lat && userLoc?.lng) latlngs.push([userLoc.lat, userLoc.lng])
@@ -466,7 +465,6 @@ const viewReportDetails = async (reportId) => {
         }
       } catch (e) {
         console.error("❌ Failed to fetch responder location:", e)
-        // Show a more user-friendly message in the UI
         locationFetchError.value = true
       }
     }
@@ -477,14 +475,12 @@ const viewReportDetails = async (reportId) => {
       responderLocation,
     }
 
-    // Wait for the modal to be fully rendered and visible
     await nextTick()
-    // Give the modal time to appear and the container to get dimensions
     setTimeout(() => {
       if (selectedReport.value) {
         initIncidentMap()
       }
-    }, 350) // increased delay
+    }, 350)
 
     if (detailsRes.data.assigned_to) {
       responderLocationInterval = setInterval(async () => {
@@ -492,7 +488,7 @@ const viewReportDetails = async (reportId) => {
           const locRes = await api.get(`/api/responder/location/${detailsRes.data.assigned_to}`)
           if (locRes.data.exists !== false && locRes.data.lat && locRes.data.lng) {
             selectedReport.value.responderLocation = locRes.data
-            initIncidentMap()   // this will re‑draw markers and fetch the new route
+            initIncidentMap()
           }
         } catch (e) {
           // silent
@@ -536,7 +532,6 @@ const refreshResponderLocation = async () => {
     refreshingLocation.value = false
   }
 }
-// Helper functions for reports
 const severityIcon = (severity) => {
   const icons = { critical: "🔴", high: "🟠", medium: "🟡", low: "🟢" }
   return icons[severity?.toLowerCase()] || "⚪"
@@ -580,7 +575,6 @@ const showHistorySidebar = ref(false)
 const chatInput = ref(null)
 const isUserAtBottom = ref(true)
 
-// Chat history helpers
 const saveChatHistory = () => {
   try {
     localStorage.setItem("chatbotHistory", JSON.stringify(chatbotMessages.value))
@@ -950,10 +944,9 @@ const connectWebSocket = () => {
     ws.close(1000, "Reconnecting")
   }
 
-  // ✅ CORRECT – use the backend host from api.defaults.baseURL
-  const apiBase = api.defaults.baseURL              // e.g., 'https://roadrescue-api.onrender.com'
+  const apiBase = api.defaults.baseURL
   const url = new URL(apiBase)
-  const wsHost = url.host                           // e.g., 'roadrescue-api.onrender.com'
+  const wsHost = url.host
   const protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
   const wsUrl = `${protocol}//${wsHost}/ws/route/${userId}?token=${token}`
   console.log("Connecting to WebSocket:", wsUrl)
@@ -1131,7 +1124,6 @@ const startHTTPPolling = () => {
   }, 30000)
 }
 
-// Real-time functions
 const enableRealTime = async () => {
   if (!routeStart.value || !routeDestination.value) {
     alert("Please set start and destination points first")
@@ -1474,7 +1466,6 @@ const useMyLocation = () => {
   )
 }
 
-// Route planning helper functions
 const enableSetStartPoint = () => {
   isSettingStart.value = true
   isSettingDestination.value = false
@@ -2708,7 +2699,6 @@ const testAIEndpoint = async () => {
   }
 }
 
-// Refresh functions for auto‑refresh
 const refreshMyReports = async () => {
   if (active.value !== "myreports") return
   await loadMyReports()
@@ -2732,12 +2722,10 @@ useAutoRefresh({ refreshFn: refreshAnnouncements, interval: 60000, enabled: true
 useAutoRefresh({ refreshFn: refreshLegal, interval: 60000, enabled: true })
 
 onBeforeUnmount(() => {
-  // Clear intervals
   if (responderLocationInterval) {
     clearInterval(responderLocationInterval)
     responderLocationInterval = null
   }
-  if (responderLocationInterval) clearInterval(responderLocationInterval) // duplicate? removed
 
   window.removeEventListener("resize", handleResize)
   document.removeEventListener("visibilitychange", connectWebSocket)
@@ -2779,15 +2767,6 @@ onBeforeUnmount(() => {
     <header class="topbar">
       <div class="topbar-accent"></div>
       <div class="topbar-inner">
-        <button
-          v-if="windowWidth < 640"
-          class="hamburger"
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          aria-label="Menu"
-        >
-          <span></span><span></span><span></span>
-        </button>
-
         <div class="brand">
           <div class="seal-wrap">
             <img class="seal" :src="calapanLogo" alt="Calapan City Seal" />
@@ -2812,13 +2791,8 @@ onBeforeUnmount(() => {
     <!-- ========== MAIN LAYOUT ========== -->
     <main class="main">
       <div class="layout">
-        <!-- ========== SIDE NAVIGATION ========== -->
-        <nav class="nav" :class="{ 'mobile-open': mobileMenuOpen }">
-          <div class="nav-brand">
-            <div class="nav-brand-title">Menu</div>
-            <button class="nav-close" @click="mobileMenuOpen = false" aria-label="Close">×</button>
-          </div>
-
+        <!-- ========== SIDE NAVIGATION (desktop only) ========== -->
+        <nav class="nav">
           <button class="navbtn" :class="{ on: active === 'overview' }" @click="go('overview')">
             <span class="nav-icon">◈</span><span class="nav-label">Overview</span>
           </button>
@@ -2844,13 +2818,6 @@ onBeforeUnmount(() => {
             <span class="nav-icon">◉</span><span class="nav-label">Profile</span>
           </button>
         </nav>
-
-        <!-- Mobile backdrop -->
-        <div
-          v-if="mobileMenuOpen && windowWidth < 640"
-          class="nav-backdrop"
-          @click="mobileMenuOpen = false"
-        ></div>
 
         <!-- ========== MAIN CONTENT AREA ========== -->
         <section class="content">
@@ -3780,6 +3747,21 @@ onBeforeUnmount(() => {
         <span>© {{ new Date().getFullYear() }} RESQAPP · Calapan City</span>
       </div>
     </footer>
+
+    <!-- ========== MOBILE BOTTOM NAV ========== -->
+    <nav class="bottom-nav" aria-label="Mobile navigation">
+      <button
+        v-for="item in navItems"
+        :key="item.key"
+        type="button"
+        class="bottom-nav-btn"
+        :class="{ on: active === item.key }"
+        @click="go(item.key)"
+      >
+        <span class="bottom-nav-icon">{{ item.icon }}</span>
+        <span class="bottom-nav-label">{{ item.label }}</span>
+      </button>
+    </nav>
   </div>
 </template>
 
@@ -4173,53 +4155,7 @@ img {
 
 
 /* ============================================================
-   HAMBURGER
-   ============================================================ */
-
-.hamburger {
-  display: none;
-
-  width: 38px;
-  height: 38px;
-
-  padding: .55rem;
-
-  flex-direction: column;
-  justify-content: center;
-
-  gap: 5px;
-
-  background: transparent;
-
-  border: 1px solid transparent;
-
-  border-radius: var(--radius-md);
-
-  cursor: pointer;
-}
-
-.hamburger span {
-  width: 100%;
-  height: 2px;
-
-  display: block;
-
-  background: var(--brand-700);
-
-  border-radius: var(--radius-full);
-
-  transition: var(--transition);
-}
-
-.hamburger:hover {
-  background: var(--brand-50);
-
-  border-color: var(--brand-100);
-}
-
-
-/* ============================================================
-   NAVIGATION
+   NAVIGATION (DESKTOP SIDEBAR)
    ============================================================ */
 
 .nav {
@@ -4335,15 +4271,87 @@ img {
   flex: 1;
 }
 
-.nav-backdrop {
+
+/* ============================================================
+   BOTTOM NAVIGATION (MOBILE ONLY)
+   ============================================================ */
+
+.bottom-nav {
+  display: none;                     /* hidden by default – shown on mobile */
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
 
-  background: rgba(6, 36, 79, .42);
+  padding: .35rem .4rem calc(.35rem + env(safe-area-inset-bottom, 0px));
 
-  z-index: 45;
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
 
-  backdrop-filter: blur(3px);
+  border-top: 1px solid var(--ink-200);
+  box-shadow: 0 -2px 12px rgba(15, 23, 42, .05);
+
+  /* horizontal scroll if there are many items */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-nav::-webkit-scrollbar { display: none; }
+
+.bottom-nav-btn {
+  flex: 1 0 56px;                    /* each item at least 56px wide */
+  min-width: 56px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: .12rem;
+
+  padding: .4rem .25rem;
+
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+
+  color: var(--ink-500);
+
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.bottom-nav-btn:hover,
+.bottom-nav-btn.on {
+  color: var(--brand-700);
+  background: var(--brand-50);
+}
+
+.bottom-nav-btn.on {
+  color: var(--brand-800);
+}
+
+.bottom-nav-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: transform var(--transition-fast);
+}
+
+.bottom-nav-btn.on .bottom-nav-icon {
+  transform: translateY(-1px);
+}
+
+.bottom-nav-label {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
 }
 
 
@@ -7211,7 +7219,8 @@ select:focus-visible {
 .btn:focus-visible,
 .action-btn:focus-visible,
 .btn-send:focus-visible,
-.btn-new-report:focus-visible {
+.btn-new-report:focus-visible,
+.bottom-nav-btn:focus-visible {
   box-shadow: var(--focus-ring);
 }
 
@@ -7245,7 +7254,7 @@ select:focus-visible {
 
 
 /* ============================================================
-   RESPONSIVE — MOBILE
+   RESPONSIVE — MOBILE (sidebar hidden, bottom nav visible)
    ============================================================ */
 
 @media (max-width: 767px) {
@@ -7268,90 +7277,23 @@ select:focus-visible {
     overflow: hidden;
   }
 
-  .hamburger {
-    display: flex;
-  }
-
   .layout {
     gap: 0;
   }
 
+  /* 🚫 hide desktop sidebar entirely on mobile */
   .nav {
-    position: fixed;
-
-    top: 0;
-    left: 0;
-    bottom: 0;
-
-    width: 280px;
-    max-width: 86vw;
-
-    z-index: 50;
-
-    padding: .8rem;
-
-    border-radius:
-      0
-      var(--radius-xl)
-      var(--radius-xl)
-      0;
-
-    transform: translateX(-105%);
-
-    transition:
-      transform .28s cubic-bezier(.4, 0, .2, 1);
-
-    overflow-y: auto;
-
-    box-shadow: var(--shadow-xl);
+    display: none !important;
   }
 
-  .nav.mobile-open {
-    transform: translateX(0);
-  }
-
-  .nav-brand {
+  /* ✅ show the bottom nav only on mobile */
+  .bottom-nav {
     display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    padding: .2rem .3rem .8rem;
-
-    margin-bottom: .45rem;
-
-    border-bottom: 1px solid var(--ink-200);
   }
 
-  .nav-brand-title {
-    color: var(--brand-600);
-
-    font-size: .68rem;
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: .1em;
-  }
-
-  .nav-close {
-    width: 30px;
-    height: 30px;
-
-    display: grid;
-    place-items: center;
-
-    color: var(--brand-700);
-
-    background: var(--brand-50);
-
-    border: 0;
-
-    border-radius: 50%;
-
-    font-size: 1.1rem;
-
-    cursor: pointer;
+  /* make room above the fixed bottom bar */
+  .content {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 
   .two {
@@ -7618,4 +7560,3 @@ select:focus-visible {
 }
 
 </style>
-
