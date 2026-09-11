@@ -2777,11 +2777,13 @@ onBeforeUnmount(() => {
   <div class="page">
     <!-- ========== HEADER / TOPBAR ========== -->
     <header class="topbar">
+      <div class="topbar-accent"></div>
       <div class="topbar-inner">
         <button
           v-if="windowWidth < 640"
           class="hamburger"
           @click="mobileMenuOpen = !mobileMenuOpen"
+          aria-label="Menu"
         >
           <span></span><span></span><span></span>
         </button>
@@ -2791,14 +2793,18 @@ onBeforeUnmount(() => {
             <img class="seal" :src="calapanLogo" alt="Calapan City Seal" />
           </div>
           <div class="brand-text">
-            <div class="brand-title">RESQAPP • Dashboard</div>
-            <div class="brand-subtitle">Calapan City, Oriental Mindoro</div>
+            <div class="brand-title">RESQAPP</div>
+            <div class="brand-subtitle">Calapan City · Emergency Response</div>
           </div>
         </div>
 
         <div class="right">
-          <span class="role" :class="roleClass">{{ role }}</span>
-          <button class="btn btn-outline btn-sm" @click="logout">Logout</button>
+          <span class="role" :class="roleClass">
+            <span class="role-dot"></span>{{ role }}
+          </span>
+          <button class="btn btn-ghost btn-sm" @click="logout">
+            <span class="btn-ico">⏻</span> Logout
+          </button>
         </div>
       </div>
     </header>
@@ -2808,62 +2814,34 @@ onBeforeUnmount(() => {
       <div class="layout">
         <!-- ========== SIDE NAVIGATION ========== -->
         <nav class="nav" :class="{ 'mobile-open': mobileMenuOpen }">
-          <button
-            class="navbtn"
-            :class="{ on: active === 'overview' }"
-            @click="go('overview')"
-          >
-            Overview
+          <div class="nav-brand">
+            <div class="nav-brand-title">Menu</div>
+            <button class="nav-close" @click="mobileMenuOpen = false" aria-label="Close">×</button>
+          </div>
+
+          <button class="navbtn" :class="{ on: active === 'overview' }" @click="go('overview')">
+            <span class="nav-icon">◈</span><span class="nav-label">Overview</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'report' }"
-            @click="go('report')"
-          >
-            Create Report
+          <button class="navbtn" :class="{ on: active === 'report' }" @click="go('report')">
+            <span class="nav-icon">⚠</span><span class="nav-label">Create Report</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'map' }"
-            @click="go('map')"
-          >
-            Map
+          <button class="navbtn" :class="{ on: active === 'map' }" @click="go('map')">
+            <span class="nav-icon">◎</span><span class="nav-label">Map</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'myreports' }"
-            @click="go('myreports')"
-          >
-            My Reports
+          <button class="navbtn" :class="{ on: active === 'myreports' }" @click="go('myreports')">
+            <span class="nav-icon">▤</span><span class="nav-label">My Reports</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'announcements' }"
-            @click="go('announcements')"
-          >
-            Announcements
+          <button class="navbtn" :class="{ on: active === 'announcements' }" @click="go('announcements')">
+            <span class="nav-icon">◔</span><span class="nav-label">Announcements</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'chat' }"
-            @click="go('chat')"
-          >
-            Messages
+          <button class="navbtn" :class="{ on: active === 'chat' }" @click="go('chat')">
+            <span class="nav-icon">✦</span><span class="nav-label">Messages</span>
           </button>
-          <button
-            class="navbtn"
-            :class="{ on: active === 'legal' }"
-            @click="go('legal')"
-          >
-            Legal Info
+          <button class="navbtn" :class="{ on: active === 'legal' }" @click="go('legal')">
+            <span class="nav-icon">§</span><span class="nav-label">Legal Info</span>
           </button>
-          
-          <button
-            class="navbtn"
-            :class="{ on: active === 'profile' }"
-            @click="go('profile')"
-          >
-            Profile
+          <button class="navbtn" :class="{ on: active === 'profile' }" @click="go('profile')">
+            <span class="nav-icon">◉</span><span class="nav-label">Profile</span>
           </button>
         </nav>
 
@@ -2877,15 +2855,19 @@ onBeforeUnmount(() => {
         <!-- ========== MAIN CONTENT AREA ========== -->
         <section class="content">
           <!-- ===== OVERVIEW ===== -->
-          <div v-if="active === 'overview'" class="card">
-            <h2 class="h2">Welcome</h2>
-            <p class="p">
-              Use RESQAPP to submit incident reports with accurate details and
-              location to support faster response.
-            </p>
+          <div v-if="active === 'overview'" class="card hero-card">
+            <div class="hero-head">
+              <span class="hero-eyebrow">Welcome back</span>
+              <h2 class="h2">Your safety hub</h2>
+              <p class="p">
+                Submit incident reports, plan smarter routes, and stay informed
+                with real-time alerts from Calapan City responders.
+              </p>
+            </div>
 
             <div class="grid">
               <div class="mini">
+                <div class="mini-icon">⚠</div>
                 <div class="miniTitle">Quick Report</div>
                 <div class="miniText">
                   Start a new incident report in under a minute.
@@ -2896,6 +2878,7 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="mini">
+                <div class="mini-icon">◎</div>
                 <div class="miniTitle">Real-time Map</div>
                 <div class="miniText">
                   Get live traffic updates and AI-optimized routes.
@@ -2906,6 +2889,7 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="mini">
+                <div class="mini-icon">✦</div>
                 <div class="miniTitle">Live Chat</div>
                 <div class="miniText">
                   Chat directly with responders for urgent assistance.
@@ -2917,139 +2901,102 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-<div v-else-if="active === 'announcements'" class="card">
-  <h2 class="h2">📢 Announcements</h2>
-  <p class="p">
-    Official announcements and active alerts from Calapan City
-    responders.
-  </p>
+          <!-- ===== ANNOUNCEMENTS ===== -->
+          <div v-else-if="active === 'announcements'" class="card">
+            <div class="section-head">
+              <div>
+                <h2 class="h2">Announcements</h2>
+                <p class="p">Official alerts from Calapan City responders.</p>
+              </div>
+              <span class="badge-count">{{ activeAlerts.length }} active</span>
+            </div>
 
-  <div v-if="activeAlerts.length" class="announcements-list">
-    <div
-      v-for="alert in activeAlerts"
-      :key="alert.id"
-      class="announcement-card"
-      :class="alert.severity"
-    >
-      <div class="announcement-header">
-        <span class="severity-badge" :class="alert.severity">{{
-          alert.severity
-        }}</span>
-        <span class="announcement-time">{{
-          formatAlertTime(alert.created_at)
-        }}</span>
-      </div>
-      <p class="announcement-message">{{ alert.message }}</p>
+            <div v-if="activeAlerts.length" class="announcements-list">
+              <div
+                v-for="alert in activeAlerts"
+                :key="alert.id"
+                class="announcement-card"
+                :class="alert.severity"
+              >
+                <div class="announcement-header">
+                  <span class="severity-badge" :class="alert.severity">{{ alert.severity }}</span>
+                  <span class="announcement-time">{{ formatAlertTime(alert.created_at) }}</span>
+                </div>
+                <p class="announcement-message">{{ alert.message }}</p>
 
-      <!-- Action buttons row -->
-      <div class="announcement-actions">
-        <button
-          v-if="alert.image_url"
-          class="action-btn image-btn"
-          @click="openImageModal(getFullImageUrl(alert.image_url))"
-        >
-          📷 View Image
-        </button>
-        <button
-          v-if="alert.geometry"
-          class="action-btn map-btn"
-          @click="openAlertMap(alert.geometry)"
-        >
-          🗺️ View affected area
-        </button>
-      </div>
-    </div>
-  </div>
+                <div class="announcement-actions">
+                  <button
+                    v-if="alert.image_url"
+                    class="action-btn image-btn"
+                    @click="openImageModal(getFullImageUrl(alert.image_url))"
+                  >
+                    <span>◨</span> View Image
+                  </button>
+                  <button
+                    v-if="alert.geometry"
+                    class="action-btn map-btn"
+                    @click="openAlertMap(alert.geometry)"
+                  >
+                    <span>◎</span> View affected area
+                  </button>
+                </div>
+              </div>
+            </div>
 
-  <!-- Empty state -->
-  <div v-else class="empty-announcements">
-    <p>No active announcements at this time.</p>
-  </div>
-</div>
+            <div v-else class="empty-state">
+              <div class="empty-icon">◔</div>
+              <h3>All clear</h3>
+              <p>No active announcements at this time.</p>
+            </div>
+          </div>
 
           <!-- ===== CREATE REPORT ===== -->
           <div v-else-if="active === 'report'" class="card">
-            <h2 class="h2">Create Incident Report</h2>
-            <p class="p">
-              AI‑powered analysis will auto‑detect the incident type and
-              severity.
-            </p>
+            <div class="section-head">
+              <div>
+                <h2 class="h2">Create Incident Report</h2>
+                <p class="p">
+                  AI‑powered analysis will auto‑detect the incident type and severity.
+                </p>
+              </div>
+            </div>
 
             <!-- AI Analysis Preview -->
             <div v-if="aiAnalysisPreview" class="ai-analysis-preview">
               <div class="ai-header">
-                <span class="ai-badge">🤖 AI Analysis</span>
-                <span class="ai-confidence"
-                  >Confidence:
-                  {{ (aiAnalysisPreview.confidence * 100).toFixed(0) }}%</span
-                >
+                <span class="ai-badge">AI Analysis</span>
+                <span class="ai-confidence">
+                  {{ (aiAnalysisPreview.confidence * 100).toFixed(0) }}% confidence
+                </span>
               </div>
               <div class="ai-content">
-                <!-- Incident Type Display/Edit -->
                 <div class="ai-type-section">
                   <strong>Detected Incident:</strong>
-                  <div
-                    v-if="!editingIncidentType"
-                    class="type-display"
-                  >
+                  <div v-if="!editingIncidentType" class="type-display">
                     <span class="ai-type-badge">{{
                       reportData.incident_type || aiAnalysisPreview.type
                     }}</span>
-                    <button
-                      class="btn-edit-type"
-                      @click="startEditingIncidentType"
-                    >
-                      ✎
-                    </button>
+                    <button class="btn-edit-type" @click="startEditingIncidentType" title="Edit">✎</button>
                   </div>
                   <div v-else class="type-edit">
-                    <select
-                      v-model="manualIncidentType"
-                      class="input type-select"
-                    >
-                      <option
-                        v-for="type in incidentTypes"
-                        :key="type"
-                        :value="type"
-                      >
-                        {{ type }}
-                      </option>
+                    <select v-model="manualIncidentType" class="input type-select">
+                      <option v-for="type in incidentTypes" :key="type" :value="type">{{ type }}</option>
                     </select>
                     <div class="edit-actions">
-                      <button class="btn-save-type" @click="saveIncidentType">
-                        ✓
-                      </button>
-                      <button
-                        class="btn-cancel-type"
-                        @click="cancelEditIncidentType"
-                      >
-                        ✕
-                      </button>
+                      <button class="btn-save-type" @click="saveIncidentType">✓</button>
+                      <button class="btn-cancel-type" @click="cancelEditIncidentType">✕</button>
                     </div>
                   </div>
                 </div>
                 <div class="ai-severity">
                   <strong>Severity:</strong>
-                  <span
-                    class="severity-badge"
-                    :class="aiAnalysisPreview.severity.toLowerCase()"
-                  >
+                  <span class="severity-badge" :class="aiAnalysisPreview.severity.toLowerCase()">
                     {{ aiAnalysisPreview.severity }}
                   </span>
                 </div>
-                <div
-                  v-if="
-                    aiAnalysisPreview.keywords &&
-                    aiAnalysisPreview.keywords.length
-                  "
-                  class="ai-keywords"
-                >
+                <div v-if="aiAnalysisPreview.keywords && aiAnalysisPreview.keywords.length" class="ai-keywords">
                   <strong>Keywords:</strong>
-                  <span
-                    v-for="keyword in aiAnalysisPreview.keywords"
-                    :key="keyword"
-                    class="keyword-tag"
-                  >
+                  <span v-for="keyword in aiAnalysisPreview.keywords" :key="keyword" class="keyword-tag">
                     {{ keyword }}
                   </span>
                 </div>
@@ -3057,11 +3004,8 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="form">
-              <!-- Description -->
               <div>
-                <label class="label"
-                  >Detailed Description <span class="required">*</span></label
-                >
+                <label class="label">Detailed Description <span class="required">*</span></label>
                 <textarea
                   v-model="reportData.description"
                   class="input"
@@ -3074,154 +3018,84 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Location: Barangay + Address -->
               <div class="two">
                 <div>
-                  <label class="label"
-                    >Barangay <span class="required">*</span></label
-                  >
+                  <label class="label">Barangay <span class="required">*</span></label>
                   <select v-model="reportData.barangay" class="input">
                     <option value="">Select Barangay</option>
-                    <option
-                      v-for="barangay in barangayList"
-                      :key="barangay"
-                      :value="barangay"
-                    >
+                    <option v-for="barangay in barangayList" :key="barangay" :value="barangay">
                       {{ barangay }}
                     </option>
                   </select>
                 </div>
                 <div>
                   <label class="label">Landmark/Address</label>
-                  <input
-                    v-model="reportData.address"
-                    class="input"
-                    placeholder="Nearest landmark or street"
-                  />
+                  <input v-model="reportData.address" class="input" placeholder="Nearest landmark or street" />
                 </div>
               </div>
 
-              <!-- Hidden coordinates (still bound) -->
               <input type="hidden" v-model="reportData.latitude" />
               <input type="hidden" v-model="reportData.longitude" />
 
-              <!-- Location picker controls -->
               <div class="location-picker">
-                <div
-                  class="location-summary"
-                  :class="{ 'not-set': !reportData.latitude }"
-                >
+                <div class="location-summary" :class="{ 'not-set': !reportData.latitude }">
                   {{ locationSummary }}
                 </div>
                 <div class="location-actions">
-                  <button
-                    type="button"
-                    class="btn-location"
-                    @click="openLocationPicker"
-                  >
-                    🗺️ Pick on Map
+                  <button type="button" class="btn-location" @click="openLocationPicker">
+                    <span>◎</span> Pick on Map
                   </button>
                 </div>
               </div>
 
-              <!-- Contact Information -->
               <div class="two">
                 <div>
                   <label class="label">Your Contact Number</label>
-                  <input
-                    v-model="reportData.contact_number"
-                    class="input"
-                    placeholder="0912 345 6789"
-                  />
+                  <input v-model="reportData.contact_number" class="input" placeholder="0912 345 6789" />
                 </div>
                 <div>
                   <label class="label">Emergency Contact</label>
-                  <input
-                    v-model="reportData.emergency_contact"
-                    class="input"
-                    placeholder="Emergency contact (optional)"
-                  />
+                  <input v-model="reportData.emergency_contact" class="input" placeholder="Emergency contact (optional)" />
                 </div>
               </div>
 
-              <!-- Media Upload -->
               <div>
                 <label class="label">Upload Media (Optional)</label>
                 <div class="media-upload">
                   <div class="upload-buttons">
                     <label class="btn-upload">
-                      📷 Add Image
-                      <input
-                        type="file"
-                        accept="image/*"
-                        @change.prevent="handleImageUpload"
-                        @click.stop
-                        
-                        hidden
-                        multiple
-                      />
+                      <span>◨</span> Add Image
+                      <input type="file" accept="image/*" @change.prevent="handleImageUpload" @click.stop hidden multiple />
                     </label>
                     <label class="btn-upload">
-                      🎥 Add Video
-                      <input
-                        type="file"
-                        accept="video/*"
-                        @change.prevent="handleVideoUpload"
-                        @click.stop
-                        hidden
-                      />
+                      <span>▶</span> Add Video
+                      <input type="file" accept="video/*" @change.prevent="handleVideoUpload" @click.stop hidden />
                     </label>
                   </div>
 
-                  <!-- Preview -->
                   <div v-if="uploadedMedia.length" class="media-preview">
-                    <div
-                      v-for="(media, index) in uploadedMedia"
-                      :key="index"
-                      class="media-item"
-                    >
+                    <div v-for="(media, index) in uploadedMedia" :key="index" class="media-item">
                       <div class="media-thumbnail">
-                        <img
-                          v-if="media.type === 'image'"
-                          :src="media.preview"
-                          alt="Preview"
-                        />
-                        <div v-else class="video-thumbnail">🎥</div>
-                        <button
-                          @click="removeMedia(index)"
-                          class="btn-remove-media"
-                        >
-                          ×
-                        </button>
+                        <img v-if="media.type === 'image'" :src="media.preview" alt="Preview" />
+                        <div v-else class="video-thumbnail">▶</div>
+                        <button @click="removeMedia(index)" class="btn-remove-media">×</button>
                       </div>
                       <div class="media-info">
                         <span class="media-name">{{ media.name }}</span>
-                        <span class="media-size">{{
-                          formatFileSize(media.size)
-                        }}</span>
+                        <span class="media-size">{{ formatFileSize(media.size) }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- AI Recommendations -->
-              <div
-                v-if="aiRecommendations.length"
-                class="ai-recommendations"
-              >
-                <h4>🤖 AI Recommendations:</h4>
+              <div v-if="aiRecommendations.length" class="ai-recommendations">
+                <h4>AI Recommendations</h4>
                 <ul>
-                  <li
-                    v-for="(rec, index) in aiRecommendations.slice(0, 5)"
-                    :key="index"
-                  >
-                    {{ rec }}
-                  </li>
+                  <li v-for="(rec, index) in aiRecommendations.slice(0, 5)" :key="index">{{ rec }}</li>
                 </ul>
               </div>
 
-              <!-- Submit Actions -->
               <div class="actions">
                 <button
                   @click="submitReport"
@@ -3234,51 +3108,33 @@ onBeforeUnmount(() => {
                     !reportData.longitude
                   "
                 >
-                  <span v-if="isSubmitting">🔄 Submitting...</span>
-                  <span v-else>🚨 Submit Report</span>
+                  <span v-if="isSubmitting">Submitting…</span>
+                  <span v-else>Submit Report</span>
                 </button>
-                <button @click="clearForm" class="btn btn-outline-blue">
-                  Clear Form
-                </button>
+                <button @click="clearForm" class="btn btn-outline-blue">Clear Form</button>
               </div>
 
-              <!-- Submission Status -->
-              <div
-                v-if="submissionStatus"
-                class="submission-status"
-                :class="submissionStatus.type"
-              >
+              <div v-if="submissionStatus" class="submission-status" :class="submissionStatus.type">
                 {{ submissionStatus.message }}
               </div>
             </div>
 
-            <!-- Location Picker Modal (inside report card) -->
-            <div
-              v-if="showLocationPicker"
-              class="modal-overlay"
-              @click.self="closeLocationPicker"
-            >
+            <!-- Location Picker Modal -->
+            <div v-if="showLocationPicker" class="modal-overlay" @click.self="closeLocationPicker">
               <div class="modal-content map-modal">
                 <div class="modal-header">
                   <h3>Pick Location on Map</h3>
-                  <button class="modal-close" @click="closeLocationPicker">
-                    ×
-                  </button>
+                  <button class="modal-close" @click="closeLocationPicker">×</button>
                 </div>
                 <div class="modal-body">
                   <div id="location-picker-map" class="picker-map"></div>
                   <div class="selected-coords">
-                    Selected: {{ tempLocation.lat?.toFixed(6) }},
-                    {{ tempLocation.lng?.toFixed(6) }}
+                    Selected: {{ tempLocation.lat?.toFixed(6) }}, {{ tempLocation.lng?.toFixed(6) }}
                   </div>
                 </div>
                 <div class="modal-actions">
-                  <button class="btn btn-outline" @click="closeLocationPicker">
-                    Cancel
-                  </button>
-                  <button class="btn btn-primary" @click="confirmLocation">
-                    Confirm Location
-                  </button>
+                  <button class="btn btn-outline" @click="closeLocationPicker">Cancel</button>
+                  <button class="btn btn-primary" @click="confirmLocation">Confirm Location</button>
                 </div>
               </div>
             </div>
@@ -3289,68 +3145,34 @@ onBeforeUnmount(() => {
             <div class="mapTop">
               <div>
                 <h2 class="h2">Map & Directions</h2>
-                <p class="p">
-                  Plan your route with smart AI optimization and real-time
-                  traffic.
-                </p>
+                <p class="p">Plan routes with AI optimization and live traffic.</p>
               </div>
-
               <div class="mapActions">
-                <button
-                  class="btn btn-outline-blue"
-                  :disabled="locating"
-                  @click="useMyLocation"
-                >
-                  {{ locating ? "Locating..." : "Use My Location" }}
+                <button class="btn btn-outline-blue" :disabled="locating" @click="useMyLocation">
+                  {{ locating ? "Locating…" : "Use My Location" }}
                 </button>
-                <button
-                  class="btn btn-outline-blue"
-                  @click="showRoutePanel = !showRoutePanel"
-                >
-                  {{
-                    showRoutePanel ? "Hide Route Planner" : "Show Route Planner"
-                  }}
+                <button class="btn btn-outline-blue" @click="showRoutePanel = !showRoutePanel">
+                  {{ showRoutePanel ? "Hide Route Planner" : "Show Route Planner" }}
                 </button>
               </div>
             </div>
 
-            <!-- Route Planning Panel -->
             <div v-if="showRoutePanel" class="route-panel">
               <div class="route-header">
                 <h3>Route Planner</h3>
-                <button
-                  class="btn-clear-route"
-                  @click="clearRoute"
-                  title="Clear Route"
-                >
-                  🗑️ Clear
-                </button>
+                <button class="btn-clear-route" @click="clearRoute" title="Clear Route">Clear</button>
               </div>
 
               <div class="route-form">
                 <div class="form-group">
                   <label class="label">Starting Point</label>
                   <div class="input-with-actions">
-                    <input
-                      v-model="routeStart"
-                      class="input"
-                      placeholder="Click map or use current location"
-                      readonly
-                    />
+                    <input v-model="routeStart" class="input" placeholder="Click map or use current location" readonly />
                     <div class="input-actions">
-                      <button
-                        class="btn-small"
-                        @click="enableSetStartPoint"
-                        :class="{ active: isSettingStart }"
-                      >
-                        {{ isSettingStart ? "Click Map..." : "Set on Map" }}
+                      <button class="btn-small" @click="enableSetStartPoint" :class="{ active: isSettingStart }">
+                        {{ isSettingStart ? "Click Map…" : "Set on Map" }}
                       </button>
-                      <button
-                        class="btn-small"
-                        @click="useCurrentLocationAsStart"
-                      >
-                        📍 Current
-                      </button>
+                      <button class="btn-small" @click="useCurrentLocationAsStart">Current</button>
                     </div>
                   </div>
                 </div>
@@ -3358,71 +3180,51 @@ onBeforeUnmount(() => {
                 <div class="form-group">
                   <label class="label">Destination</label>
                   <div class="input-with-actions">
-                    <input
-                      v-model="routeDestination"
-                      class="input"
-                      placeholder="Click map to set destination"
-                      readonly
-                    />
+                    <input v-model="routeDestination" class="input" placeholder="Click map to set destination" readonly />
                     <div class="input-actions">
-                      <button
-                        class="btn-small"
-                        @click="enableSetDestination"
-                        :class="{ active: isSettingDestination }"
-                      >
-                        {{
-                          isSettingDestination ? "Click Map..." : "Set on Map"
-                        }}
+                      <button class="btn-small" @click="enableSetDestination" :class="{ active: isSettingDestination }">
+                        {{ isSettingDestination ? "Click Map…" : "Set on Map" }}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <!-- AI Controls (commented out) -->
-                <!-- Real-time Controls (commented out) -->
-
-                <!-- Route Actions -->
                 <div class="route-actions">
                   <div class="action-buttons"></div>
                 </div>
 
                 <div class="form-group">
-  <label class="label">Transport Mode</label>
-  <div class="mode-selector">
-    <button
-      v-for="mode in availableModes"
-      :key="mode.value"
-      type="button"
-      class="mode-btn"
-      :class="{ active: transportMode === mode.value }"
-      @click="transportMode = mode.value; if (routeStart && routeDestination) calculateRoute()"
-    >
-      <span class="mode-icon">{{ mode.icon }}</span>
-      <span class="mode-label">{{ mode.label }}</span>
-    </button>
-  </div>
-  <div v-if="transportMode === 'walking'" class="mode-hint">
-    🚶 Walking routes use pedestrian paths. Times are estimates.
-  </div>
-
-  <div v-else-if="transportMode === 'motorcycle'" class="mode-hint">
-    🏍️ Motorcycle routes optimized for two-wheelers.
-  </div>
-</div>
-
-                <!-- AI Loading Indicator -->
-                <div v-if="aiLoading" class="ai-loading">
-                  <div class="ai-spinner"></div>
-                  <span>🤖 AI is optimizing your route...</span>
+                  <label class="label">Transport Mode</label>
+                  <div class="mode-selector">
+                    <button
+                      v-for="mode in availableModes"
+                      :key="mode.value"
+                      type="button"
+                      class="mode-btn"
+                      :class="{ active: transportMode === mode.value }"
+                      @click="transportMode = mode.value; if (routeStart && routeDestination) calculateRoute()"
+                    >
+                      <span class="mode-icon">{{ mode.icon }}</span>
+                      <span class="mode-label">{{ mode.label }}</span>
+                    </button>
+                  </div>
+                  <div v-if="transportMode === 'walking'" class="mode-hint">
+                    Walking routes use pedestrian paths. Times are estimates.
+                  </div>
+                  <div v-else-if="transportMode === 'motorcycle'" class="mode-hint">
+                    Motorcycle routes optimized for two-wheelers.
+                  </div>
                 </div>
 
-                <!-- Live Traffic Info -->
+                <div v-if="aiLoading" class="ai-loading">
+                  <div class="ai-spinner"></div>
+                  <span>AI is optimizing your route…</span>
+                </div>
+
                 <div v-if="realTimeEnabled && liveTraffic" class="live-traffic-info">
                   <div class="traffic-header">
-                    <h5>🚦 Live Traffic Update</h5>
-                    <span class="traffic-time">{{
-                      new Date().toLocaleTimeString()
-                    }}</span>
+                    <h5>Live Traffic Update</h5>
+                    <span class="traffic-time">{{ new Date().toLocaleTimeString() }}</span>
                   </div>
                   <div class="traffic-details">
                     <div class="traffic-level" :class="liveTraffic.traffic_level">
@@ -3431,53 +3233,34 @@ onBeforeUnmount(() => {
                     <div v-if="eta" class="eta-info">
                       <span class="eta-label">Current ETA:</span>
                       <span class="eta-value">{{ Math.ceil(eta.current / 60) }} min</span>
-                      <span v-if="eta.delay > 0" class="eta-delay"
-                        >(+{{ Math.ceil(eta.delay / 60) }} min delay)</span
-                      >
+                      <span v-if="eta.delay > 0" class="eta-delay">(+{{ Math.ceil(eta.delay / 60) }} min delay)</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Route Alerts -->
                 <div v-if="routeAlerts.length > 0" class="route-alerts">
-                  <div class="alerts-header">
-                    <h5>⚠️ Route Alerts</h5>
-                  </div>
+                  <div class="alerts-header"><h5>Route Alerts</h5></div>
                   <div class="alerts-list">
-                    <div
-                      v-for="alert in routeAlerts"
-                      :key="alert.id"
-                      class="alert-item"
-                      :class="alert.severity"
-                    >
-                      <span class="alert-icon">{{
-                        alert.severity === "high" ? "🚨" : "⚠️"
-                      }}</span>
+                    <div v-for="alert in routeAlerts" :key="alert.id" class="alert-item" :class="alert.severity">
+                      <span class="alert-icon">{{ alert.severity === "high" ? "!" : "▲" }}</span>
                       <span class="alert-text">{{ alert.message }}</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Route Information -->
                 <div v-if="routeInfo" class="route-info">
                   <div class="route-stats">
                     <div class="stat">
                       <div class="stat-label">Distance</div>
-                      <div class="stat-value">
-                        {{ (routeInfo.distance / 1000).toFixed(1) }} km
-                      </div>
+                      <div class="stat-value">{{ (routeInfo.distance / 1000).toFixed(1) }} km</div>
                     </div>
                     <div class="stat">
                       <div class="stat-label">Travel Time</div>
-                      <div class="stat-value">
-                        {{ Math.ceil(routeInfo.duration / 60) }} min
-                      </div>
+                      <div class="stat-value">{{ Math.ceil(routeInfo.duration / 60) }} min</div>
                     </div>
                     <div v-if="routeInfo.trafficDelay" class="stat">
                       <div class="stat-label">Traffic Delay</div>
-                      <div class="stat-value warning">
-                        +{{ Math.ceil(routeInfo.trafficDelay / 60) }} min
-                      </div>
+                      <div class="stat-value warning">+{{ Math.ceil(routeInfo.trafficDelay / 60) }} min</div>
                     </div>
                   </div>
 
@@ -3489,18 +3272,13 @@ onBeforeUnmount(() => {
                       class="alt-route"
                       :class="{ best: alt.time_saving > 0 }"
                     >
-                      {{ index + 1 }}. {{ (alt.distance / 1000).toFixed(1) }}km,
-                      {{ Math.ceil(alt.duration / 60) }}min
-                      <span v-if="alt.time_saving > 0" class="time-saving"
-                        >(Save {{ Math.ceil(alt.time_saving / 60) }} min)</span
-                      >
+                      {{ index + 1 }}. {{ (alt.distance / 1000).toFixed(1) }}km, {{ Math.ceil(alt.duration / 60) }}min
+                      <span v-if="alt.time_saving > 0" class="time-saving">(Save {{ Math.ceil(alt.time_saving / 60) }} min)</span>
                     </div>
                   </div>
                 </div>
 
-                <div v-if="routeError" class="route-error">
-                  {{ routeError }}
-                </div>
+                <div v-if="routeError" class="route-error">{{ routeError }}</div>
               </div>
             </div>
 
@@ -3511,37 +3289,32 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="mapHint">
-              Tip: Enable real-time updates for live traffic monitoring and route
-              optimization.
+              Tip: Enable real-time updates for live traffic monitoring and route optimization.
             </div>
           </div>
 
           <!-- ===== MY REPORTS ===== -->
           <div v-else-if="active === 'myreports'" class="reports-container">
-            <!-- Header Section -->
             <div class="reports-header">
               <div>
                 <h2 class="reports-title">My Incident Reports</h2>
-                <p class="reports-subtitle">
-                  Track and manage your submitted reports
-                </p>
+                <p class="reports-subtitle">Track and manage your submitted reports</p>
               </div>
               <button class="btn-new-report" @click="go('report')">
                 <span class="btn-icon">+</span> New Report
               </button>
             </div>
 
-            <!-- Stats Cards -->
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-icon total">📋</div>
+                <div class="stat-icon total">▤</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ reportStats.total }}</div>
                   <div class="stat-label">Total Reports</div>
                 </div>
               </div>
               <div class="stat-card">
-                <div class="stat-icon resolved">✅</div>
+                <div class="stat-icon resolved">✓</div>
                 <div class="stat-content">
                   <div class="stat-value">{{ reportStats.resolved }}</div>
                   <div class="stat-label">Resolved</div>
@@ -3549,28 +3322,19 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Search and Filter Bar -->
             <div class="search-filter-bar">
               <div class="search-box">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon">⌕</span>
                 <input
                   v-model="reportSearchQuery"
                   type="text"
-                  placeholder="Search by ID, type, location..."
+                  placeholder="Search by ID, type, location…"
                   class="search-input"
                 />
-                <button
-                  v-if="reportSearchQuery"
-                  @click="reportSearchQuery = ''"
-                  class="clear-search"
-                >
-                  ✕
-                </button>
+                <button v-if="reportSearchQuery" @click="reportSearchQuery = ''" class="clear-search">×</button>
               </div>
-
             </div>
 
-            <!-- Loading State -->
             <div v-if="loadingMyReports" class="loading-skeleton">
               <div v-for="i in 3" :key="i" class="skeleton-row">
                 <div class="skeleton-cell" style="width: 20%"></div>
@@ -3582,9 +3346,8 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Empty State -->
             <div v-else-if="filteredReports.length === 0" class="empty-state">
-              <div class="empty-icon">📭</div>
+              <div class="empty-icon">▤</div>
               <h3>No reports found</h3>
               <p v-if="reportSearchQuery || reportStatusFilter !== 'all'">
                 Try adjusting your search or filters
@@ -3599,7 +3362,6 @@ onBeforeUnmount(() => {
               </button>
             </div>
 
-            <!-- Reports Table -->
             <div v-else class="reports-table-container">
               <table class="reports-table">
                 <thead>
@@ -3612,24 +3374,14 @@ onBeforeUnmount(() => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-for="report in filteredReports"
-                    :key="report.id"
-                    class="report-row"
-                  >
-                    <td class="report-id">#{{ report.id.substring(0, 8) }}</td>
-                    <td class="report-type">{{ report.incident_type || 'Unknown' }}</td>
-                    
-                 
-                    <td class="report-location">{{ report.barangay || 'Unknown' }}</td>
-                    <td class="report-date">{{ formatDate(report.created_at) }}</td>
-                    <td>
-                      <button
-                        class="btn-view"
-                        @click="viewReportDetails(report.id)"
-                        title="View Details"
-                      >
-                        <span class="btn-view-icon">👁️</span>
+                  <tr v-for="report in filteredReports" :key="report.id" class="report-row">
+                    <td class="report-id" data-label="ID">#{{ report.id.substring(0, 8) }}</td>
+                    <td class="report-type" data-label="Type">{{ report.incident_type || 'Unknown' }}</td>
+                    <td class="report-location" data-label="Location">{{ report.barangay || 'Unknown' }}</td>
+                    <td class="report-date" data-label="Date">{{ formatDate(report.created_at) }}</td>
+                    <td data-label="Actions">
+                      <button class="btn-view" @click="viewReportDetails(report.id)" title="View Details">
+                        <span class="btn-view-icon">◉</span>
                         <span>Details</span>
                       </button>
                     </td>
@@ -3641,34 +3393,36 @@ onBeforeUnmount(() => {
 
           <!-- ===== LEGAL INFO ===== -->
           <div v-else-if="active === 'legal'" class="card">
-            <h2 class="h2">⚖️ Legal Information</h2>
-            <p class="p">Laws and official statements relevant to emergency reporting and public safety in Calapan City.</p>
+            <div class="section-head">
+              <div>
+                <h2 class="h2">Legal Information</h2>
+                <p class="p">
+                  Laws and official statements relevant to emergency reporting and public safety in Calapan City.
+                </p>
+              </div>
+            </div>
 
-            <!-- Search -->
             <div class="legal-search-wrap">
-              <span class="legal-search-icon">🔍</span>
+              <span class="legal-search-icon">⌕</span>
               <input
                 v-model="legalSearch"
                 class="legal-search-input"
                 placeholder="Search by title, law number, or category…"
               />
-              <button v-if="legalSearch" @click="legalSearch = ''" class="legal-search-clear">✕</button>
+              <button v-if="legalSearch" @click="legalSearch = ''" class="legal-search-clear">×</button>
             </div>
 
-            <!-- Loading -->
             <div v-if="legalLoading" class="loading-skeleton">
               <div class="skeleton-row" v-for="i in 3" :key="i"><div class="skeleton-cell"></div></div>
             </div>
 
-            <!-- Empty -->
             <div v-else-if="filteredLegal.length === 0" class="empty-state">
-              <div class="empty-icon">⚖️</div>
+              <div class="empty-icon">§</div>
               <h3>{{ legalSearch ? 'No results found' : 'No legal information available' }}</h3>
               <p>{{ legalSearch ? 'Try a different search term.' : 'Check back later for updates.' }}</p>
               <button v-if="legalSearch" @click="legalSearch = ''" class="legal-clear-btn">Clear Search</button>
             </div>
 
-            <!-- Cards -->
             <div v-else class="legal-grid">
               <div
                 v-for="entry in filteredLegal"
@@ -3688,15 +3442,14 @@ onBeforeUnmount(() => {
                     >{{ entry.category }}</span>
                     <span v-if="entry.law_number" class="legal-num-tag">{{ entry.law_number }}</span>
                   </div>
-                  <span v-if="entry.effective_date" class="legal-date-tag">📅 {{ entry.effective_date }}</span>
+                  <span v-if="entry.effective_date" class="legal-date-tag">{{ entry.effective_date }}</span>
                 </div>
                 <h3 class="legal-entry-title">{{ entry.title }}</h3>
                 <p class="legal-entry-desc">{{ entry.description }}</p>
-                <button class="legal-view-btn" @click="openLegalDetail(entry)">📜 Read Official Statement</button>
+                <button class="legal-view-btn" @click="openLegalDetail(entry)">Read Official Statement</button>
               </div>
             </div>
 
-            <!-- Detail Modal -->
             <div v-if="showLegalDetailModal && selectedLegal" class="modal-overlay" @click.self="showLegalDetailModal = false">
               <div class="modal-content legal-detail-modal">
                 <div class="modal-header">
@@ -3719,11 +3472,11 @@ onBeforeUnmount(() => {
                 <div class="modal-body">
                   <p class="legal-modal-desc">{{ selectedLegal.description }}</p>
                   <div class="legal-statement-box">
-                    <div class="legal-statement-label">📜 Official Statement</div>
+                    <div class="legal-statement-label">Official Statement</div>
                     <div class="legal-statement-text">{{ selectedLegal.official_statement }}</div>
                   </div>
                   <div v-if="selectedLegal.effective_date" class="legal-modal-meta">
-                    📅 Effective Date: <strong>{{ selectedLegal.effective_date }}</strong>
+                    Effective Date: <strong>{{ selectedLegal.effective_date }}</strong>
                   </div>
                 </div>
                 <div class="modal-footer-actions">
@@ -3735,16 +3488,10 @@ onBeforeUnmount(() => {
 
           <!-- ===== CHAT ===== -->
           <div v-else-if="active === 'chat'" class="chat-layout">
-            <!-- History Sidebar -->
-            <div
-              class="chat-history-sidebar"
-              :class="{ hidden: !showHistorySidebar }"
-            >
+            <div class="chat-history-sidebar" :class="{ hidden: !showHistorySidebar }">
               <div class="sidebar-header">
                 <h3>Chat History</h3>
-                <button class="btn-new-chat" @click="createNewChat">
-                  + New Chat
-                </button>
+                <button class="btn-new-chat" @click="createNewChat">+ New</button>
               </div>
 
               <div class="chat-history-list">
@@ -3762,13 +3509,7 @@ onBeforeUnmount(() => {
                       <span class="chat-count">{{ chat.messageCount }} messages</span>
                     </div>
                   </div>
-                  <button
-                    class="btn-delete-chat"
-                    @click="deleteChatFromHistory(chat.id, $event)"
-                    title="Delete chat"
-                  >
-                    🗑️
-                  </button>
+                  <button class="btn-delete-chat" @click="deleteChatFromHistory(chat.id, $event)" title="Delete chat">×</button>
                 </div>
 
                 <div v-if="chatHistoryList.length === 0" class="empty-history">
@@ -3778,42 +3519,22 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Main Chat Area -->
             <div class="chat-main-area">
-              <!-- Chat Header -->
               <div class="chat-main-header">
-                <button
-                  class="btn-toggle-sidebar"
-                  @click="showHistorySidebar = !showHistorySidebar"
-                  v-if="windowWidth < 768"
-                >
+                <button class="btn-toggle-sidebar" @click="showHistorySidebar = !showHistorySidebar" v-if="windowWidth < 768">
                   ≡ History
                 </button>
                 <h2 class="chat-title">RESQAPP Assistant</h2>
                 <div class="chat-header-actions">
-                  <button
-                    v-if="chatbotMessages.length > 1"
-                    @click="clearChatHistory"
-                    class="btn-clear"
-                    title="Clear current chat"
-                  >
-                    🗑️ Clear
+                  <button v-if="chatbotMessages.length > 1" @click="clearChatHistory" class="btn-clear" title="Clear current chat">
+                    Clear
                   </button>
-                  <button
-                    @click="createNewChat"
-                    class="btn-new-chat-header"
-                    title="New chat"
-                  >
-                    + New
-                  </button>
+                  <button @click="createNewChat" class="btn-new-chat-header" title="New chat">+ New</button>
                 </div>
               </div>
 
-              <!-- Chatbot Card -->
               <div class="card chatbot-card">
-                <div class="chatbot-header">
-                 
-                </div>
+                <div class="chatbot-header"></div>
 
                 <div class="chatbot-body">
                   <div class="chatbot-messages">
@@ -3827,40 +3548,27 @@ onBeforeUnmount(() => {
                       <div v-if="msg.timestamp" class="message-time">{{ msg.timestamp }}</div>
                     </div>
 
-                    <!-- Quick Replies -->
                     <div v-if="showQuickReplies" class="chatbot-quick-replies">
                       <p class="quick-replies-title">Quick questions:</p>
                       <div class="quick-replies-buttons">
-                        <button @click="useQuickReply('How do I report an incident?')">
-                          📝 Report Incident
-                        </button>
-                        <button @click="useQuickReply('Current traffic situation')">
-                          🚦 Traffic Update
-                        </button>
-                        <button @click="useQuickReply('Emergency contacts')">
-                          🆘 Emergency Help
-                        </button>
+                        <button @click="useQuickReply('How do I report an incident?')">Report Incident</button>
+                        <button @click="useQuickReply('Current traffic situation')">Traffic Update</button>
+                        <button @click="useQuickReply('Emergency contacts')">Emergency Help</button>
                       </div>
                     </div>
 
-                    <!-- Typing indicator -->
                     <div v-if="chatbotLoading" class="chatbot-typing">
-                      <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                      </div>
-                      Assistant is typing...
+                      <div class="typing-dots"><span></span><span></span><span></span></div>
+                      Assistant is typing…
                     </div>
                   </div>
 
-                  <!-- Input area -->
                   <div class="chatbot-input-area">
                     <div class="chatbot-input-wrapper">
                       <textarea
                         ref="chatInput"
                         v-model="chatbotInput"
-                        placeholder="Type your message..."
+                        placeholder="Type your message…"
                         rows="1"
                         @input="adjustTextareaHeight"
                         @keydown="handleKeyDown"
@@ -3872,12 +3580,10 @@ onBeforeUnmount(() => {
                         :disabled="!chatbotInput.trim() || chatbotLoading"
                       >
                         <span v-if="!chatbotLoading">Send</span>
-                        <span v-else class="sending">...</span>
+                        <span v-else class="sending">…</span>
                       </button>
                     </div>
-                    <div class="input-hint">
-                      Press Enter to send • Shift+Enter for new line
-                    </div>
+                    <div class="input-hint">Press Enter to send • Shift+Enter for new line</div>
                   </div>
                 </div>
               </div>
@@ -3888,11 +3594,11 @@ onBeforeUnmount(() => {
           <div v-else class="card">
             <div class="profile-card">
               <h2 class="profile-title">User Profile</h2>
+
               <div class="profile-avatar">
                 <div class="avatar-wrapper">
                   <img :src="avatarUrl" class="avatar-img" alt="Profile Picture" />
                 </div>
-
                 <label class="avatar-upload">
                   Change Photo
                   <input type="file" accept="image/*" @change="onAvatarChange" hidden />
@@ -3904,32 +3610,26 @@ onBeforeUnmount(() => {
                   <label>Full Name</label>
                   <input v-model="profile.full_name" type="text" />
                 </div>
-
                 <div class="form-group">
                   <label>Email (read-only)</label>
                   <input v-model="profile.email" type="email" disabled />
                 </div>
-
                 <div class="form-group">
                   <label>Contact Number</label>
                   <input v-model="profile.contact_number" type="text" />
                 </div>
-
                 <div class="form-group">
                   <label>Barangay</label>
                   <input v-model="profile.barangay" type="text" />
                 </div>
-
                 <div class="form-group full">
                   <label>Address</label>
                   <textarea v-model="profile.address"></textarea>
                 </div>
-
                 <div class="form-group">
                   <label>Emergency Contact Name</label>
                   <input v-model="profile.emergency_contact_name" type="text" />
                 </div>
-
                 <div class="form-group">
                   <label>Emergency Contact Number</label>
                   <input v-model="profile.emergency_contact_number" type="text" />
@@ -3937,2376 +3637,1863 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="profile-actions">
-                <button class="btn-save" @click="saveProfile">
-                  Update Profile
-                </button>
+                <button class="btn-save" @click="saveProfile">Update Profile</button>
               </div>
             </div>
           </div>
 
-          <!-- ===== GLOBAL MODALS (placed outside v-if but inside content) ===== -->
-          <!-- Alert Map Modal -->
-          <div
-            v-if="showAlertMapModal"
-            class="modal-overlay"
-            @click.self="showAlertMapModal = false"
-          >
+          <!-- ===== GLOBAL MODALS ===== -->
+          <div v-if="showAlertMapModal" class="modal-overlay" @click.self="showAlertMapModal = false">
             <div class="modal-content" style="max-width: 800px">
               <div class="modal-header">
                 <h3>Alert Area</h3>
-                <button class="modal-close" @click="showAlertMapModal = false">
-                  ×
-                </button>
+                <button class="modal-close" @click="showAlertMapModal = false">×</button>
               </div>
               <div class="modal-body">
-                <div
-                  id="alert-map"
-                  style="height: 400px; width: 100%; border-radius: 8px"
-                ></div>
+                <div id="alert-map" style="height: 400px; width: 100%; border-radius: 12px"></div>
               </div>
             </div>
           </div>
 
-          <!-- Image Modal -->
-          <div
-            v-if="showImageModal"
-            class="modal-overlay"
-            @click.self="showImageModal = false"
-          >
+          <div v-if="showImageModal" class="modal-overlay" @click.self="showImageModal = false">
             <div class="modal-content" style="max-width: 600px">
               <div class="modal-header">
                 <h3>Announcement Image</h3>
-                <button class="modal-close" @click="showImageModal = false">
-                  ×
-                </button>
+                <button class="modal-close" @click="showImageModal = false">×</button>
               </div>
               <div class="modal-body">
-                <img
-                  :src="modalImageUrl"
-                  style="width: 100%; border-radius: 8px"
-                />
+                <img :src="modalImageUrl" style="width: 100%; border-radius: 12px" />
               </div>
             </div>
           </div>
-
 
           <!-- Report Details Modal -->
-<div v-if="showReportModal" class="modal-overlay" @click.self="showReportModal = false">
-  <div class="modal-content" style="max-width: 700px;">
-    <div class="modal-header">
-      <h3>Incident Details</h3>
-      <button class="modal-close" @click="showReportModal = false">×</button>
-    </div>
-    <div class="modal-body">
-      <div v-if="loadingReportDetails" class="loading">Loading details...</div>
-      <div v-else-if="selectedReport" class="report-details">
-        <!-- Basic info -->
-        <div class="detail-row">
-          <strong>ID:</strong> #{{ selectedReport.id }}
-        </div>
-        <div class="detail-row">
-          <strong>Type:</strong> {{ selectedReport.incident_type || 'Unknown' }}
-        </div>
-        <div class="detail-row">
-          <strong>Severity:</strong>
-          <span class="severity-badge" :class="selectedReport.severity?.toLowerCase()">
-            {{ selectedReport.severity || 'N/A' }}
-          </span>
-        </div>
-        <div class="detail-row">
-          <strong>Status:</strong>
-          <span class="status-badge" :class="selectedReport.status">
-            {{ selectedReport.status || 'pending' }}
-          </span>
-        </div>
-        <div class="detail-row">
-          <strong>Location:</strong> {{ selectedReport.barangay || 'Unknown' }}
-          <span v-if="selectedReport.address"> ({{ selectedReport.address }})</span>
-        </div>
-        <div class="detail-row">
-          <strong>Description:</strong>
-          <p>{{ selectedReport.description }}</p>
-        </div>
-        <div class="detail-row">
-          <strong>Reported at:</strong> {{ new Date(selectedReport.created_at).toLocaleString() }}
-        </div>
-        <div class="detail-row">
-          <strong>Your Contact:</strong> {{ selectedReport.contact_number || 'Not provided' }}
-        </div>
-        <div class="detail-row" v-if="selectedReport.emergency_contact">
-          <strong>Emergency Contact:</strong> {{ selectedReport.emergency_contact }}
-        </div>
-
-        <div v-if="selectedReport && (selectedReport.latitude && selectedReport.longitude)" class="detail-row">
-          <strong>📍 Location Map:</strong>
-          <div id="incident-map" style="height:300px;width:100%;border-radius:8px;margin-top:8px;background:#f8fafc;"></div>
-          
-          <!-- Responder ETA -->
-          <div v-if="selectedReport.responderLocation" class="eta-info" style="margin-top:8px;padding:8px;background:#f1f5f9;border-radius:6px;">
-            <span>🚑 Responder ETA: <strong>{{ etaText(selectedReport) }}</strong></span>
-            <span style="margin-left:12px;font-size:0.8rem;color:#64748b;">
-              (last update: {{ new Date(selectedReport.responderLocation.updated_at).toLocaleTimeString() }})
-            </span>
-          </div>
-          
-          <!-- Responder location unavailable -->
-          <div v-else-if="selectedReport.assigned_to" style="margin-top:8px;padding:10px;background:#fef3c7;border-radius:6px;color:#92400e;border:1px solid #fcd34d;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-            <span>⚠️ Responder location not yet available</span>
-            <button 
-              @click="refreshResponderLocation" 
-              class="btn-small" 
-              style="background:#f97316;color:white;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;"
-              :disabled="refreshingLocation"
-            >
-              {{ refreshingLocation ? '⏳ Refreshing...' : '🔄 Refresh' }}
-            </button>
-          </div>
-          
-          <!-- No responder assigned -->
-          <div v-else-if="selectedReport.assigned_to === null" style="margin-top:8px;padding:8px;background:#f3f4f6;border-radius:6px;color:#6b7280;">
-            📋 No responder assigned to this incident yet.
-          </div>
-        </div>
-
-        <!-- AI Analysis (if available) -->
-        <div v-if="selectedReport.text_analysis" class="detail-row">
-          <strong>🤖 AI Analysis:</strong>
-          <div>Predicted type: {{ selectedReport.text_analysis.incident_type }} 
-            ({{ (selectedReport.text_analysis.type_confidence * 100).toFixed(0) }}% confidence)
-          </div>
-          <div>Predicted severity: {{ selectedReport.text_analysis.severity }}
-            ({{ (selectedReport.text_analysis.severity_confidence * 100).toFixed(0) }}% confidence)
-          </div>
-        </div>
-
-        <!-- Images (if any) -->
-        <div v-if="parseMediaArray(selectedReport.image_paths).length > 0" class="detail-row">
-          <strong>📷 Images:</strong>
-          <div class="media-list">
-            <div v-for="(img, idx) in parseMediaArray(selectedReport.image_paths)" :key="idx" class="media-thumb">
-              <img :src="getFullImageUrl(img)" @error="handleImageError" @click="openImageModal(getFullImageUrl(img))" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Videos (if any) -->
-        <div v-if="parseMediaArray(selectedReport.video_paths).length > 0" class="detail-row">
-          <strong>🎥 Videos:</strong>
-          <div class="media-list">
-            <video v-for="(vid, idx) in parseMediaArray(selectedReport.video_paths)" :key="idx" controls :src="getFullImageUrl(vid)" style="max-width: 200px; margin-right: 8px;"></video>
-          </div>
-        </div>
+          <div v-if="showReportModal" class="modal-overlay" @click.self="showReportModal = false">
+            <div class="modal-content" style="max-width: 700px;">
+              <div class="modal-header">
+                <h3>Incident Details</h3>
+                <button class="modal-close" @click="showReportModal = false">×</button>
               </div>
-              <div v-else class="no-data">Unable to load incident details.</div>
-            </div>
-            <div class="modal-actions">
-              <button class="btn btn-outline" @click="showReportModal = false">Close</button>
+              <div class="modal-body">
+                <div v-if="loadingReportDetails" class="loading">Loading details…</div>
+                <div v-else-if="selectedReport" class="report-details">
+                  <div class="detail-row"><strong>ID:</strong> #{{ selectedReport.id }}</div>
+                  <div class="detail-row"><strong>Type:</strong> {{ selectedReport.incident_type || 'Unknown' }}</div>
+                  <div class="detail-row">
+                    <strong>Severity:</strong>
+                    <span class="severity-badge" :class="selectedReport.severity?.toLowerCase()">
+                      {{ selectedReport.severity || 'N/A' }}
+                    </span>
+                  </div>
+                  <div class="detail-row">
+                    <strong>Status:</strong>
+                    <span class="status-badge" :class="selectedReport.status">
+                      {{ selectedReport.status || 'pending' }}
+                    </span>
+                  </div>
+                  <div class="detail-row">
+                    <strong>Location:</strong> {{ selectedReport.barangay || 'Unknown' }}
+                    <span v-if="selectedReport.address"> ({{ selectedReport.address }})</span>
+                  </div>
+                  <div class="detail-row">
+                    <strong>Description:</strong>
+                    <p>{{ selectedReport.description }}</p>
+                  </div>
+                  <div class="detail-row">
+                    <strong>Reported at:</strong> {{ new Date(selectedReport.created_at).toLocaleString() }}
+                  </div>
+                  <div class="detail-row">
+                    <strong>Your Contact:</strong> {{ selectedReport.contact_number || 'Not provided' }}
+                  </div>
+                  <div class="detail-row" v-if="selectedReport.emergency_contact">
+                    <strong>Emergency Contact:</strong> {{ selectedReport.emergency_contact }}
+                  </div>
+
+                  <div v-if="selectedReport && (selectedReport.latitude && selectedReport.longitude)" class="detail-row">
+                    <strong>Location Map:</strong>
+                    <div id="incident-map" style="height:300px;width:100%;border-radius:12px;margin-top:8px;background:#f8fafc;"></div>
+
+                    <div v-if="selectedReport.responderLocation" class="eta-info" style="margin-top:8px;padding:10px;background:#f1f5f9;border-radius:8px;">
+                      <span>Responder ETA: <strong>{{ etaText(selectedReport) }}</strong></span>
+                      <span style="margin-left:12px;font-size:0.8rem;color:#64748b;">
+                        (last update: {{ new Date(selectedReport.responderLocation.updated_at).toLocaleTimeString() }})
+                      </span>
+                    </div>
+
+                    <div v-else-if="selectedReport.assigned_to" style="margin-top:8px;padding:10px;background:#fef3c7;border-radius:8px;color:#92400e;border:1px solid #fcd34d;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+                      <span>Responder location not yet available</span>
+                      <button
+                        @click="refreshResponderLocation"
+                        class="btn-small"
+                        style="background:#f97316;color:white;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;"
+                        :disabled="refreshingLocation"
+                      >
+                        {{ refreshingLocation ? 'Refreshing…' : 'Refresh' }}
+                      </button>
+                    </div>
+
+                    <div v-else-if="selectedReport.assigned_to === null" style="margin-top:8px;padding:10px;background:#f3f4f6;border-radius:8px;color:#6b7280;">
+                      No responder assigned to this incident yet.
+                    </div>
+                  </div>
+
+                  <div v-if="selectedReport.text_analysis" class="detail-row">
+                    <strong>AI Analysis:</strong>
+                    <div>Predicted type: {{ selectedReport.text_analysis.incident_type }}
+                      ({{ (selectedReport.text_analysis.type_confidence * 100).toFixed(0) }}% confidence)
+                    </div>
+                    <div>Predicted severity: {{ selectedReport.text_analysis.severity }}
+                      ({{ (selectedReport.text_analysis.severity_confidence * 100).toFixed(0) }}% confidence)
+                    </div>
+                  </div>
+
+                  <div v-if="parseMediaArray(selectedReport.image_paths).length > 0" class="detail-row">
+                    <strong>Images:</strong>
+                    <div class="media-list">
+                      <div v-for="(img, idx) in parseMediaArray(selectedReport.image_paths)" :key="idx" class="media-thumb">
+                        <img :src="getFullImageUrl(img)" @error="handleImageError" @click="openImageModal(getFullImageUrl(img))" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="parseMediaArray(selectedReport.video_paths).length > 0" class="detail-row">
+                    <strong>Videos:</strong>
+                    <div class="media-list">
+                      <video v-for="(vid, idx) in parseMediaArray(selectedReport.video_paths)" :key="idx" controls :src="getFullImageUrl(vid)" style="max-width: 200px; margin-right: 8px;"></video>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="no-data">Unable to load incident details.</div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn btn-outline" @click="showReportModal = false">Close</button>
+              </div>
             </div>
           </div>
-        </div>
         </section>
-        <!-- end content -->
       </div>
-      <!-- end layout -->
     </main>
 
     <!-- ========== FOOTER ========== -->
     <footer class="footer">
       <div class="footer-inner">
-        <span>© {{ new Date().getFullYear() }} RESQAPP • Calapan City</span>
+        <span>© {{ new Date().getFullYear() }} RESQAPP · Calapan City</span>
       </div>
     </footer>
   </div>
-  <!-- end page -->
 </template>
 
 <style scoped>
-/* ===== RESET & GLOBAL ===== */
-
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
 :root {
-  --topbar-height: 70px;
-}
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  --brand-900: #0f2547;
+  --brand-800: #16325c;
+  --brand-700: #1e3c72;
+  --brand-600: #2a5298;
+  --brand-500: #3b6bc4;
+  --brand-100: #e8effa;
+  --brand-50:  #f2f7fe;
+
+  --accent-600: #ea580c;
+  --accent-500: #f97316;
+  --accent-100: #ffedd5;
+
+  --ok: #10b981;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+
+  --ink-900: #0b1220;
+  --ink-800: #1e293b;
+  --ink-700: #334155;
+  --ink-600: #475569;
+  --ink-500: #64748b;
+  --ink-400: #94a3b8;
+  --ink-300: #cbd5e1;
+  --ink-200: #e2e8f0;
+  --ink-100: #f1f5f9;
+  --ink-50:  #f8fafc;
+
+  --bg: #f4f6fb;
+  --card: #ffffff;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-2xl: 28px;
+  --r-full: 9999px;
+
+  --sh-xs: 0 1px 2px rgba(15,23,42,.05);
+  --sh-sm: 0 2px 6px rgba(15,23,42,.06);
+  --sh-md: 0 6px 16px rgba(15,23,42,.08);
+  --sh-lg: 0 14px 34px rgba(15,23,42,.10);
+  --sh-xl: 0 24px 48px rgba(15,23,42,.14);
+  --sh-brand: 0 10px 24px -8px rgba(30,60,114,.45);
+  --sh-accent: 0 10px 24px -8px rgba(249,115,22,.5);
+
+  --ring: 0 0 0 3px rgba(42,82,152,.15);
 }
 
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ============================================================
+   BASE LAYOUT
+   ============================================================ */
 .page {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf2 100%);
-  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(42,82,152,.06), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(249,115,22,.06), transparent 60%),
+    var(--bg);
+  color: var(--ink-800);
+  line-height: 1.55;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  color: #1e293b;
-  line-height: 1.5;
-  height: 100vh;          /* full viewport height */
-  overflow: hidden;       /* prevent page scroll */
+  overflow: hidden;
 }
 
-/* ===== TYPOGRAPHY ===== */
+.main {
+  flex: 1;
+  min-height: 0;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-gutter: stable;
+}
+
+.content::-webkit-scrollbar { width: 8px; }
+.content::-webkit-scrollbar-thumb { background: var(--ink-300); border-radius: 999px; }
+.content::-webkit-scrollbar-thumb:hover { background: var(--ink-400); }
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
 .h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+  margin-bottom: 0.35rem;
 }
-
 .p {
-  font-size: 1rem;
-  color: #475569;
-  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-500);
+  margin-bottom: 1.25rem;
 }
 
-/* ===== BUTTONS ===== */
-.btn {
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.badge-count {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
-  outline: none;
-  gap: 0.5rem;
+  gap: .35rem;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-100);
+  padding: .35rem .8rem;
+  border-radius: var(--r-full);
+  font-size: .8rem;
+  font-weight: 600;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #163a5c, #1e4b7a);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-outline,
-.btn-outline-blue {
-  background: transparent;
-  border: 2px solid #2a5298;
-  color: #2a5298;
-}
-
-.btn-outline:hover,
-.btn-outline-blue:hover {
-  background: #2a5298;
-  color: white;
-}
-
-.btn-outline-blue {
-  border-color: #2a5298;
-  color: #2a5298;
-}
-
-.btn-outline-blue:hover {
-  background: #2a5298;
-  color: white;
-}
-
-.btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-}
-
-/* ===== HEADER / TOPBAR ===== */
+/* ============================================================
+   TOPBAR
+   ============================================================ */
 .topbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 40;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid rgba(226,232,240,.9);
 }
-
+.topbar-accent {
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-700) 0%, var(--brand-500) 40%, var(--accent-500) 100%);
+}
 .topbar-inner {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0.75rem 2rem;
+  padding: .85rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1rem;
 }
 
 .hamburger {
   display: none;
   flex-direction: column;
   justify-content: space-around;
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
-  z-index: 50;
+  padding: .4rem;
+  border-radius: var(--r-sm);
 }
-
 .hamburger span {
-  width: 2rem;
-  height: 0.25rem;
-  background: #2a5298;
+  width: 100%;
+  height: 2px;
+  background: var(--brand-700);
   border-radius: 10px;
-  transition: all 0.3s;
+  transition: all .25s;
 }
+.hamburger:hover { background: var(--ink-100); }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
+.brand { display: flex; align-items: center; gap: .85rem; min-width: 0; }
 .seal-wrap {
-  width: 48px;
-  height: 48px;
+  width: 44px; height: 44px;
   border-radius: 50%;
   overflow: hidden;
   background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 0 0 2px white, 0 0 0 3px var(--brand-100), var(--sh-sm);
+  flex-shrink: 0;
 }
-
-.seal {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
+.seal { width: 100%; height: 100%; object-fit: cover; }
+.brand-text { display: flex; flex-direction: column; min-width: 0; }
 .brand-title {
-  font-weight: 700;
-  font-size: 1.25rem;
-  background: linear-gradient(135deg, #1e3c72, #f97316);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: .06em;
+  color: var(--brand-800);
+  line-height: 1.1;
 }
-
 .brand-subtitle {
-  font-size: 0.75rem;
-  color: #64748b;
+  font-size: .72rem;
+  color: var(--ink-500);
+  letter-spacing: .02em;
+  margin-top: 2px;
 }
 
-.right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+.right { display: flex; align-items: center; gap: .65rem; }
 
 .role {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .75rem;
+  border-radius: var(--r-full);
+  font-size: .72rem;
+  font-weight: 700;
   text-transform: uppercase;
-  background: #e2e8f0;
-  color: #334155;
+  letter-spacing: .06em;
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-100);
 }
-
-.role.admin {
-  background: linear-gradient(135deg, #f97316, #fb923c);
-  color: white;
+.role-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(16,185,129,.18);
 }
+.role.admin { background: linear-gradient(135deg, var(--accent-500), #fb923c); color: white; border-color: transparent; }
+.role.admin .role-dot { background: white; box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
 
-.role.responder {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-}
-
-/* ===== MAIN LAYOUT ===== */
-.main {
-  flex: 1;
-  max-width: 1400px;
-  width: 100%;
-  margin: 2rem auto;
-  padding: 0 2rem;
-  min-height: 0; 
-    display: flex;
-  flex-direction: column;
-   overflow: visible; 
-}
-
-.layout {
-    flex: 1;
-  min-height: 0;
-  display: flex;
-  gap: 2rem;
-  position: relative;
-  overflow: hidden;    
-}
-
-/* ===== SIDE NAVIGATION ===== */
+/* ============================================================
+   NAV
+   ============================================================ */
 .nav {
-  width: 220px;
+  width: 236px;
   flex-shrink: 0;
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: var(--card);
+  border-radius: var(--r-xl);
+  padding: .85rem;
+  box-shadow: var(--sh-sm);
+  border: 1px solid var(--ink-200);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: .25rem;
   height: fit-content;
   position: sticky;
-  
-  align-self: start;     
+  top: 0;
+  align-self: start;
 }
+.nav-brand { display: none; }
 
 .navbtn {
+  position: relative;
   width: 100%;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: .7rem .85rem;
   border: none;
   background: transparent;
-  border-radius: 0.5rem;
+  border-radius: var(--r-md);
   font-weight: 500;
-  color: #475569;
-  transition: all 0.2s;
+  color: var(--ink-600);
+  transition: all .18s ease;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
 }
-
-.navbtn:hover {
-  background: #f1f5f9;
-  color: #1e293b;
-}
-
+.navbtn:hover { background: var(--brand-50); color: var(--brand-700); }
 .navbtn.on {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
   font-weight: 600;
-  box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+  box-shadow: var(--sh-brand);
 }
+.navbtn.on .nav-icon { color: white; opacity: 1; }
 
-/* Mobile navigation */
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  font-size: .95rem;
+  color: var(--brand-600);
+  opacity: .85;
+  transition: color .18s;
+  flex-shrink: 0;
+}
+.nav-label { flex: 1; }
+
 .nav-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.55);
   z-index: 45;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(3px);
 }
 
-@media (max-width: 639px) {
-
-   body {
-    overflow-x: hidden;
-  }
-  .hamburger {
-    display: flex;
-  }
-
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 260px;
-    z-index: 50;
-    border-radius: 20px;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .nav.mobile-open {
-    transform: translateX(0);
-  }
-/* ===== CONTENT AREA ===== */
-.content {
-  flex: 1;
-  overflow-y: auto; 
-  min-width: 0;
-  margin-top: 0;
-  
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .6rem 1.1rem;
+  border-radius: var(--r-md);
+  font-weight: 600;
+  font-size: .875rem;
+  transition: all .18s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
-/* Optional: if you have any Leaflet controls that still peek, increase further */
-.leaflet-pane,
-.leaflet-control {
-  z-index: 400 !important;
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
+  color: white;
+  box-shadow: var(--sh-brand);
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px -10px rgba(30,60,114,.55);
 }
 
-.leaflet-top,
-.leaflet-bottom {
-  z-index: 450 !important;
-} 
-/* ===== CONTENT AREA ===== */
-.content {
-  flex: 1;
-  min-width: 0;
-  overflow-y: auto;       /* makes the content area scrollable */
-  padding-right: 4px;  
- 
-}
-
-.card {
+.btn-outline, .btn-outline-blue {
   background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
-  margin-bottom: 2rem;
+  border: 1px solid var(--ink-200);
+  color: var(--brand-700);
+}
+.btn-outline:hover, .btn-outline-blue:hover {
+  border-color: var(--brand-600);
+  background: var(--brand-50);
+  color: var(--brand-700);
 }
 
-/* ===== OVERVIEW GRID ===== */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--ink-200);
+  color: var(--ink-600);
+}
+.btn-ghost:hover { background: var(--ink-100); color: var(--ink-900); border-color: var(--ink-300); }
+
+.btn-sm { padding: .4rem .8rem; font-size: .78rem; border-radius: var(--r-sm); }
+.btn-ico { font-size: .9rem; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-xl);
+  padding: 2rem;
+  box-shadow: var(--sh-sm);
+  margin-bottom: 1.5rem;
+}
+.hero-card {
+  background:
+    radial-gradient(600px 260px at 100% 0%, rgba(42,82,152,.08), transparent 60%),
+    radial-gradient(500px 220px at 0% 100%, rgba(249,115,22,.06), transparent 60%),
+    var(--card);
+}
+.hero-head { margin-bottom: 1.5rem; }
+.hero-eyebrow {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--accent-500);
+  margin-bottom: .35rem;
+}
+
+/* ============================================================
+   OVERVIEW GRID
+   ============================================================ */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.mini {
-  background: #f8fafc;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border: 1px solid #e9eef2;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.mini:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
-  border-color: #2a5298;
-}
-
-.miniTitle {
-  font-weight: 700;
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-  color: #1e293b;
-}
-
-.miniText {
-  color: #64748b;
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-}
-
-/* ===== FORMS ===== */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  max-width: 800px;
-}
-
-.label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  display: block;
-  color: #334155;
-}
-
-.required {
-  color: #f97316;
-}
-
-.input,
-textarea,
-select {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  transition: all 0.2s;
-  background: white;
-}
-
-.input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: #2a5298;
-  box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.two {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
-
-.word-count {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  text-align: right;
-  margin-top: 0.25rem;
-}
-
-/* ===== AI ANALYSIS PREVIEW ===== */
-.ai-analysis-preview {
-  background: linear-gradient(135deg, #f0f4ff, #e6f0ff);
-  border-radius: 1rem;
+.mini {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-lg);
   padding: 1.5rem;
-  margin-bottom: 2rem;
-  border-left: 4px solid #f97316;
-}
-
-.ai-header {
+  transition: transform .22s, box-shadow .22s, border-color .22s;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: .35rem;
 }
+.mini:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sh-md);
+  border-color: var(--brand-100);
+}
+.mini-icon {
+  width: 42px; height: 42px;
+  border-radius: var(--r-md);
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--brand-50), var(--brand-100));
+  color: var(--brand-700);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+.miniTitle { font-weight: 700; font-size: 1.05rem; color: var(--ink-900); }
+.miniText { color: var(--ink-500); font-size: .88rem; margin-bottom: 1.1rem; flex: 1; }
+.mini .btn { align-self: flex-start; }
 
-.ai-badge {
-  background: #f97316;
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+/* ============================================================
+   FORMS
+   ============================================================ */
+.form { display: flex; flex-direction: column; gap: 1.4rem; max-width: 820px; }
+.label {
   font-weight: 600;
+  font-size: .82rem;
+  margin-bottom: .45rem;
+  display: block;
+  color: var(--ink-700);
+  letter-spacing: .01em;
 }
+.required { color: var(--accent-500); }
 
-.ai-confidence {
-  font-size: 0.9rem;
-  color: #1e3c72;
-  font-weight: 600;
-}
-
-.ai-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.ai-type-section,
-.ai-severity {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.type-display {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ai-type-badge {
+.input, textarea, select {
+  width: 100%;
+  padding: .75rem 1rem;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-md);
+  font-size: .95rem;
+  transition: border-color .15s, box-shadow .15s, background .15s;
   background: white;
-  padding: 0.35rem 1rem;
-  border-radius: 999px;
-  font-weight: 600;
-  color: #1e3c72;
-  border: 1px solid #2a5298;
+  color: var(--ink-800);
+  font-family: inherit;
 }
-
-.btn-edit-type {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #64748b;
+.input::placeholder, textarea::placeholder { color: var(--ink-400); }
+.input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--brand-600);
+  box-shadow: var(--ring);
 }
+.input:disabled { background: var(--ink-100); color: var(--ink-500); }
+textarea { resize: vertical; min-height: 100px; }
 
-.type-edit {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.word-count { font-size: .75rem; color: var(--ink-400); text-align: right; margin-top: .35rem; }
+
+/* AI preview */
+.ai-analysis-preview {
+  background: linear-gradient(135deg, #eef4ff, #e6efff);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid var(--accent-500);
 }
-
-.type-select {
-  width: auto;
-  min-width: 180px;
-}
-
-.edit-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
-.btn-save-type,
-.btn-cancel-type {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.btn-save-type {
-  background: #10b981;
+.ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+.ai-badge {
+  background: linear-gradient(135deg, var(--accent-500), #fb923c);
   color: white;
-}
-
-.btn-cancel-type {
-  background: #ef4444;
-  color: white;
-}
-
-.severity-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: .28rem .75rem;
+  border-radius: var(--r-full);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
   text-transform: uppercase;
 }
+.ai-confidence { font-size: .82rem; color: var(--brand-700); font-weight: 600; }
+.ai-content { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.ai-type-section, .ai-severity, .ai-keywords { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.type-display { display: flex; align-items: center; gap: .5rem; }
+.ai-type-badge {
+  background: white;
+  padding: .32rem 1rem;
+  border-radius: var(--r-full);
+  font-weight: 600;
+  color: var(--brand-700);
+  border: 1px solid var(--brand-100);
+  font-size: .85rem;
+}
+.btn-edit-type {
+  background: white;
+  border: 1px solid var(--ink-200);
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--ink-500);
+  display: grid; place-items: center;
+  transition: all .15s;
+}
+.btn-edit-type:hover { color: var(--brand-700); border-color: var(--brand-600); }
+.type-edit { display: flex; align-items: center; gap: .5rem; }
+.type-select { width: auto; min-width: 180px; }
+.edit-actions { display: flex; gap: .3rem; }
+.btn-save-type, .btn-cancel-type {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: grid; place-items: center;
+  cursor: pointer;
+  font-size: .9rem;
+  color: white;
+}
+.btn-save-type { background: var(--ok); }
+.btn-cancel-type { background: var(--danger); }
 
-.severity-badge.low {
-  background: #dbeafe;
-  color: #1e3c72;
+/* Severity pills */
+.severity-badge {
+  padding: .25rem .7rem;
+  border-radius: var(--r-full);
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  display: inline-block;
 }
-.severity-badge.medium {
-  background: #fed7aa;
-  color: #9a3412;
-}
-.severity-badge.high {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-.severity-badge.critical {
-  background: #fecaca;
-  color: #7f1d1d;
-}
-
-.ai-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-}
+.severity-badge.low { background: #dbeafe; color: #1e3c72; }
+.severity-badge.medium { background: #fed7aa; color: #9a3412; }
+.severity-badge.high { background: #fee2e2; color: #b91c1c; }
+.severity-badge.critical { background: #fecaca; color: #7f1d1d; }
 
 .keyword-tag {
   background: white;
-  padding: 0.2rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  border: 1px solid #e2e8f0;
+  padding: .2rem .7rem;
+  border-radius: var(--r-full);
+  font-size: .75rem;
+  border: 1px solid var(--ink-200);
+  color: var(--ink-600);
 }
 
-/* ===== LOCATION PICKER ===== */
+/* Location picker row */
 .location-picker {
-  background: #f8fafc;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  border: 1px dashed #94a3b8;
-}
-
-.location-summary {
-  font-size: 0.95rem;
-  color: #334155;
-  margin-bottom: 0.75rem;
-}
-
-.location-summary.not-set {
-  color: #94a3b8;
-  font-style: italic;
-}
-
-.location-actions {
+  background: var(--ink-50);
+  border-radius: var(--r-md);
+  padding: 1rem 1.1rem;
+  border: 1px dashed var(--ink-300);
   display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: .75rem;
 }
-
+.location-summary { font-size: .9rem; color: var(--ink-700); }
+.location-summary.not-set { color: var(--ink-400); font-style: italic; }
+.location-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
 .btn-location {
-  background: none;
-  border: 1px solid #2a5298;
-  color: #2a5298;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
+  background: white;
+  border: 1px solid var(--brand-600);
+  color: var(--brand-700);
+  padding: .5rem 1rem;
+  border-radius: var(--r-md);
+  font-size: .85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all .18s;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: .45rem;
 }
+.btn-location:hover { background: var(--brand-700); color: white; }
 
-.btn-location:hover {
-  background: #2a5298;
-  color: white;
-}
-
-/* ===== MEDIA UPLOAD ===== */
+/* Media upload */
 .media-upload {
-  border: 2px dashed #e2e8f0;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  background: #f9fbfd;
+  border: 2px dashed var(--ink-200);
+  border-radius: var(--r-lg);
+  padding: 1.25rem;
+  background: var(--ink-50);
+  transition: border-color .15s;
 }
-
-.upload-buttons {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
+.media-upload:hover { border-color: var(--brand-500); }
+.upload-buttons { display: flex; gap: .75rem; flex-wrap: wrap; }
 .btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
   background: white;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border: 1px solid var(--ink-200);
+  padding: .5rem 1rem;
+  border-radius: var(--r-md);
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink-700);
+  transition: all .18s;
 }
+.btn-upload:hover { border-color: var(--brand-600); color: var(--brand-700); background: var(--brand-50); }
 
-.btn-upload:hover {
-  border-color: #2a5298;
-  color: #2a5298;
-}
-
-.media-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
+.media-preview { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 .media-item {
-  width: 150px;
+  width: 140px;
   background: white;
-  border-radius: 0.5rem;
+  border-radius: var(--r-md);
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: var(--sh-xs);
+  border: 1px solid var(--ink-200);
 }
-
 .media-thumbnail {
   position: relative;
-  height: 100px;
-  background: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 95px;
+  background: var(--ink-100);
+  display: grid; place-items: center;
 }
-
-.media-thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-thumbnail {
-  font-size: 2rem;
-}
-
+.media-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+.video-thumbnail { font-size: 1.7rem; color: var(--ink-400); }
 .btn-remove-media {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
+  top: 6px; right: 6px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,.65);
   color: white;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1;
+  display: grid; place-items: center;
 }
+.media-info { padding: .5rem .6rem; }
+.media-name { font-size: .75rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-700); }
+.media-size { font-size: .68rem; color: var(--ink-400); }
 
-.media-info {
-  padding: 0.5rem;
-}
-
-.media-name {
-  font-size: 0.8rem;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.media-size {
-  font-size: 0.7rem;
-  color: #64748b;
-}
-
-/* ===== AI RECOMMENDATIONS ===== */
+/* AI recommendations */
 .ai-recommendations {
   background: #f0f9ff;
-  border-radius: 1rem;
-  padding: 1rem 1.5rem;
-  border-left: 4px solid #f97316;
+  border-radius: var(--r-lg);
+  padding: 1rem 1.35rem;
+  border-left: 4px solid var(--accent-500);
 }
+.ai-recommendations h4 { margin-bottom: .5rem; color: var(--brand-800); font-size: .95rem; }
+.ai-recommendations ul { list-style: disc; padding-left: 1.25rem; color: var(--ink-700); font-size: .9rem; }
 
-.ai-recommendations h4 {
-  margin-bottom: 0.5rem;
-  color: #1e3c72;
-}
-
-.ai-recommendations ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-  color: #334155;
-}
-
-/* ===== ACTIONS ===== */
-.actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
+.actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .25rem; }
 .submission-status {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  padding: .8rem 1rem;
+  border-radius: var(--r-md);
   font-weight: 500;
+  font-size: .9rem;
 }
+.submission-status.success { background: #d1fae5; color: #065f46; }
+.submission-status.error { background: #fee2e2; color: #b91c1c; }
+.submission-status.info { background: var(--brand-50); color: var(--brand-800); }
 
-.submission-status.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-.submission-status.error {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-/* ===== MODAL ===== */
+/* ============================================================
+   MODALS
+   ============================================================ */
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.55);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  padding: 1rem;
 }
-
 .modal-content {
   background: white;
-  border-radius: 1.5rem;
-  width: 90%;
+  border-radius: var(--r-xl);
+  width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow: auto;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  box-shadow: var(--sh-xl);
+  animation: modalIn .22s ease;
 }
-
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--ink-200);
 }
-
-.modal-header h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #1e3c72;
-}
-
+.modal-header h3 { font-size: 1.15rem; font-weight: 700; color: var(--brand-800); }
 .modal-close {
-  background: none;
+  background: var(--ink-100);
   border: none;
-  font-size: 2rem;
-  line-height: 1;
+  width: 34px; height: 34px;
+  border-radius: 50%;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--ink-500);
+  font-size: 1.35rem;
+  line-height: 1;
+  display: grid; place-items: center;
+  transition: all .15s;
 }
-
-.modal-body {
-  padding: 2rem;
-}
-
+.modal-close:hover { background: var(--ink-200); color: var(--ink-900); }
+.modal-body { padding: 1.75rem; }
 .modal-actions {
-  padding: 1rem 2rem 2rem;
+  padding: 1rem 1.75rem 1.75rem;
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: .65rem;
 }
 
-.map-modal .modal-content {
-  max-width: 800px;
-}
+.map-modal .modal-content { max-width: 800px; }
+.picker-map, #alert-map { height: 400px; width: 100%; border-radius: var(--r-md); margin-bottom: 1rem; }
+.selected-coords { text-align: center; font-size: .85rem; color: var(--ink-600); }
 
-.picker-map,
-#alert-map {
-  height: 400px;
-  width: 100%;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.selected-coords {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #334155;
-}
-
-/* ===== ANNOUNCEMENTS ===== */
-.announcements-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
+/* ============================================================
+   ANNOUNCEMENTS
+   ============================================================ */
+.announcements-list { display: flex; flex-direction: column; gap: .85rem; }
 .announcement-card {
-  background: #f8fafc;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  border-left: 4px solid #94a3b8;
-  transition: box-shadow 0.2s;
+  background: white;
+  border: 1px solid var(--ink-200);
+  border-left: 4px solid var(--ink-300);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.35rem;
+  transition: box-shadow .18s, transform .18s;
 }
+.announcement-card:hover { box-shadow: var(--sh-md); transform: translateY(-1px); }
+.announcement-card.low { border-left-color: #3b82f6; }
+.announcement-card.medium { border-left-color: var(--accent-500); }
+.announcement-card.high { border-left-color: var(--danger); }
+.announcement-card.critical { border-left-color: #7f1d1d; }
 
-.announcement-card.low {
-  border-left-color: #3b82f6;
-}
-.announcement-card.medium {
-  border-left-color: #f97316;
-}
-.announcement-card.high {
-  border-left-color: #ef4444;
-}
-.announcement-card.critical {
-  border-left-color: #7f1d1d;
-}
+.announcement-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .65rem; gap: .5rem; }
+.announcement-time { font-size: .75rem; color: var(--ink-400); }
+.announcement-message { font-size: .95rem; margin-bottom: .85rem; color: var(--ink-800); }
 
-.announcement-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.announcement-time {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.announcement-message {
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  color: #1e293b;
-}
-
-.announcement-image {
-  margin: 1rem 0;
-  border-radius: 0.5rem;
-  overflow: hidden;
+.announcement-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.action-btn {
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .45rem .9rem;
+  border-radius: var(--r-md);
   cursor: pointer;
-  max-height: 200px;
-}
-
-.announcement-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.announcement-map-btn {
-  background: #eef2ff;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  font-size: .82rem;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #1e3c72;
-  border: 1px solid #cbd5e1;
+  gap: .45rem;
+  color: var(--ink-700);
+  transition: all .18s;
 }
+.action-btn:hover { background: var(--brand-50); border-color: var(--brand-600); color: var(--brand-700); }
 
-.empty-announcements {
-  text-align: center;
-  padding: 3rem;
-  color: #94a3b8;
-  background: #f8fafc;
-  border-radius: 1rem;
-}
-
-/* ===== MAP PAGE ===== */
+/* ============================================================
+   MAP PAGE
+   ============================================================ */
 .mapTop {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
-
-.mapActions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
+.mapActions { display: flex; gap: .5rem; flex-wrap: wrap; }
 .mapStatus {
-  background: #f1f5f9;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  background: var(--ink-50);
+  border: 1px solid var(--ink-200);
+  padding: .6rem 1rem;
+  border-radius: var(--r-md);
   margin-bottom: 1rem;
-  font-size: 0.9rem;
-  color: #475569;
+  font-size: .85rem;
+  color: var(--ink-600);
 }
-
 .mapFrame {
   height: 500px;
-  border-radius: 1rem;
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: var(--sh-sm);
+  border: 1px solid var(--ink-200);
 }
+.map { width: 100%; height: 100%; z-index: 1; }
+.mapHint { margin-top: .75rem; font-size: .8rem; color: var(--ink-400); font-style: italic; }
 
-.map {
-  width: 100%;
-  height: 100%;
-  z-index: 40;
-}
-
-.mapHint {
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
-  color: #64748b;
-  font-style: italic;
-}
-
-/* Route Panel */
+/* Route panel */
 .route-panel {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  border: 1px solid #e2e8f0;
+  background: var(--ink-50);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-lg);
+  padding: 1.35rem;
+  margin-bottom: 1.25rem;
 }
-
-.route-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.route-header h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #1e3c72;
-}
-
+.route-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.route-header h3 { font-size: 1.05rem; font-weight: 700; color: var(--brand-800); }
 .btn-clear-route {
-  background: none;
-  border: 1px solid #cbd5e1;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .35rem .8rem;
+  border-radius: var(--r-sm);
   cursor: pointer;
+  font-size: .78rem;
+  color: var(--ink-600);
 }
+.btn-clear-route:hover { border-color: var(--danger); color: var(--danger); }
 
-.route-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.input-with-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.input-with-actions .input {
-  flex: 1;
-}
-
-.input-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
+.route-form { display: flex; flex-direction: column; gap: 1.15rem; }
+.form-group { display: flex; flex-direction: column; gap: .4rem; }
+.input-with-actions { display: flex; gap: .5rem; }
+.input-with-actions .input { flex: 1; }
+.input-actions { display: flex; gap: .35rem; }
 .btn-small {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .4rem .8rem;
+  border-radius: var(--r-sm);
+  font-size: .78rem;
   cursor: pointer;
   white-space: nowrap;
+  color: var(--ink-700);
+  font-weight: 500;
+  transition: all .15s;
 }
+.btn-small:hover { border-color: var(--brand-600); color: var(--brand-700); }
+.btn-small.active { background: var(--brand-700); color: white; border-color: var(--brand-700); }
 
-.btn-small.active {
-  background: #2a5298;
+.mode-selector { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .35rem; }
+.mode-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: .6rem .75rem;
+  border: 1.5px solid var(--ink-200);
+  background: white;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all .18s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  font-size: .78rem;
+  color: var(--ink-600);
+}
+.mode-btn:hover { border-color: var(--brand-600); background: var(--brand-50); color: var(--brand-700); }
+.mode-btn.active {
+  border-color: var(--brand-700);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
-  border-color: #2a5298;
 }
-
-.route-actions {
-  margin-top: 0.5rem;
+.mode-icon { font-size: 1.25rem; }
+.mode-label { font-weight: 600; }
+.mode-hint {
+  font-size: .74rem;
+  color: var(--ink-500);
+  margin-top: .5rem;
+  padding: .5rem .75rem;
+  background: white;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--ink-200);
 }
 
 .ai-loading {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: #f0f9ff;
-  border-radius: 0.5rem;
+  display: flex; align-items: center; gap: .85rem;
+  padding: .8rem 1rem;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-radius: var(--r-md);
+  font-size: .88rem;
+  color: var(--brand-700);
+  font-weight: 500;
+  border: 1px solid #bae6fd;
 }
-
 .ai-spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #f97316;
+  width: 20px; height: 20px;
+  border: 3px solid rgba(42,82,152,.15);
+  border-top-color: var(--brand-600);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin .8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+.live-traffic-info { background: white; padding: 1rem; border-radius: var(--r-md); border: 1px solid var(--ink-200); }
+.traffic-header { display: flex; justify-content: space-between; margin-bottom: .5rem; align-items: center; }
+.traffic-header h5 { font-size: .85rem; color: var(--brand-800); }
+.traffic-time { font-size: .72rem; color: var(--ink-400); }
+.traffic-level { font-weight: 700; font-size: .88rem; }
+.traffic-level.low { color: var(--ok); }
+.traffic-level.medium { color: var(--accent-500); }
+.traffic-level.high { color: var(--danger); }
+.eta-info { display: flex; gap: .5rem; font-size: .85rem; margin-top: .35rem; align-items: center; flex-wrap: wrap; }
+.eta-label { color: var(--ink-500); }
+.eta-value { font-weight: 700; color: var(--brand-700); }
+.eta-delay { color: var(--danger); font-weight: 600; }
 
-.live-traffic-info {
-  background: #f1f5f9;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-
-.traffic-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.traffic-level {
-  font-weight: 600;
-}
-.traffic-level.low { color: #10b981; }
-.traffic-level.medium { color: #f97316; }
-.traffic-level.high { color: #ef4444; }
-
-.eta-info {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.eta-delay {
-  color: #ef4444;
-}
-
-.route-alerts {
-  background: #fff7ed;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-
-.alerts-header h5 {
-  margin-bottom: 0.5rem;
-  color: #9a3412;
-}
-
+.route-alerts { background: #fff7ed; padding: 1rem; border-radius: var(--r-md); border: 1px solid #fed7aa; }
+.alerts-header h5 { margin-bottom: .5rem; color: #9a3412; font-size: .85rem; }
 .alert-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem 0;
   border-bottom: 1px solid #fed7aa;
+  font-size: .85rem;
 }
-
-.alert-item.high .alert-icon {
-  color: #ef4444;
-}
-
-.route-info {
-  background: #f8fafc;
-  padding: 1rem;
-  border-radius: 0.5rem;
-}
-
-.route-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 1rem;
-}
-
-.stat {
-  text-align: center;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.stat-value {
+.alert-item:last-child { border-bottom: none; }
+.alert-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--warn);
+  color: white;
+  display: grid; place-items: center;
+  font-size: .7rem;
   font-weight: 700;
-  font-size: 1.2rem;
+  flex-shrink: 0;
 }
+.alert-item.high .alert-icon { background: var(--danger); }
 
-.stat-value.warning {
-  color: #f97316;
-}
+.route-info { background: white; padding: 1.1rem; border-radius: var(--r-md); border: 1px solid var(--ink-200); }
+.route-stats { display: flex; justify-content: space-around; margin-bottom: .85rem; }
+.stat { text-align: center; }
+.stat-label { font-size: .72rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: .05em; font-weight: 600; margin-bottom: .15rem; }
+.stat-value { font-weight: 800; font-size: 1.15rem; color: var(--brand-800); }
+.stat-value.warning { color: var(--accent-500); }
 
-.alternatives {
-  border-top: 1px solid #e2e8f0;
-  padding-top: 1rem;
-}
+.alternatives { border-top: 1px solid var(--ink-200); padding-top: .85rem; }
+.alt-title { font-weight: 600; margin-bottom: .5rem; font-size: .82rem; color: var(--ink-600); }
+.alt-route { padding: .25rem 0; font-size: .85rem; color: var(--ink-700); }
+.alt-route.best { color: var(--ok); font-weight: 600; }
+.time-saving { color: var(--ok); font-size: .78rem; margin-left: .25rem; }
 
-.alt-title {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
+.route-error { color: var(--danger); background: #fee2e2; padding: .75rem 1rem; border-radius: var(--r-md); font-size: .85rem; }
 
-.alt-route {
-  padding: 0.25rem 0;
-  font-size: 0.9rem;
-}
-
-.alt-route.best {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.time-saving {
-  color: #10b981;
-  font-size: 0.8rem;
-}
-
-.route-error {
-  color: #ef4444;
-  background: #fee2e2;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-}
-
-/* ===== MY REPORTS ===== */
+/* ============================================================
+   MY REPORTS
+   ============================================================ */
 .reports-container {
-  background: white;
-  border-radius: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-xl);
   padding: 2rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+  box-shadow: var(--sh-sm);
 }
-
 .reports-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.75rem; gap: 1rem; flex-wrap: wrap;
 }
-
 .reports-title {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #1e3c72, #f97316);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -.02em;
+  color: var(--ink-900);
 }
-
-.reports-subtitle {
-  color: #64748b;
-}
+.reports-subtitle { color: var(--ink-500); font-size: .9rem; margin-top: .15rem; }
 
 .btn-new-report {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 999px;
+  padding: .65rem 1.25rem;
+  border-radius: var(--r-full);
   font-weight: 600;
+  font-size: .85rem;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: .4rem;
+  transition: transform .18s, box-shadow .18s;
+  box-shadow: var(--sh-brand);
 }
-
-.btn-new-report:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(30, 60, 114, 0.4);
-}
-
-.btn-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-}
+.btn-new-report:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(30,60,114,.55); }
+.btn-icon { font-size: 1.15rem; line-height: 1; }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: .85rem;
+  margin-bottom: 1.5rem;
 }
-
 .stat-card {
-  background: #f8fafc;
-  border-radius: 1rem;
-  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, var(--ink-50), white);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-lg);
+  padding: 1.15rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  border: 1px solid #e9eef2;
+  gap: .85rem;
+  transition: transform .18s, box-shadow .18s;
 }
-
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--sh-sm); }
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-}
-
-.stat-icon.total {
-  background: #dbeafe;
-  color: #1e3c72;
-}
-.stat-icon.pending {
-  background: #fed7aa;
-  color: #9a3412;
-}
-.stat-icon.in-progress {
-  background: #cffafe;
-  color: #0e7490;
-}
-.stat-icon.resolved {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 1.8rem;
+  width: 46px; height: 46px;
+  border-radius: var(--r-md);
+  display: grid; place-items: center;
+  font-size: 1.2rem;
   font-weight: 700;
-  line-height: 1.2;
+  flex-shrink: 0;
 }
+.stat-icon.total { background: var(--brand-50); color: var(--brand-700); }
+.stat-icon.resolved { background: #d1fae5; color: #065f46; }
+.stat-content { min-width: 0; }
+.stat-value { font-size: 1.5rem; font-weight: 800; line-height: 1.15; color: var(--ink-900); }
+.stat-label { font-size: .72rem; color: var(--ink-500); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
 
-.stat-label {
-  font-size: 0.8rem;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.search-filter-bar {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-}
-
+.search-filter-bar { display: flex; gap: .75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .search-box {
-  flex: 2;
-  min-width: 250px;
+  flex: 1;
+  min-width: 220px;
   position: relative;
   display: flex;
   align-items: center;
 }
-
 .search-icon {
   position: absolute;
   left: 1rem;
-  color: #94a3b8;
+  color: var(--ink-400);
+  font-size: 1.05rem;
+  pointer-events: none;
 }
-
 .search-input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  font-size: 0.95rem;
+  padding: .7rem 2.5rem .7rem 2.5rem;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-full);
+  font-size: .9rem;
+  transition: all .15s;
+  background: white;
 }
-
+.search-input:focus {
+  outline: none;
+  border-color: var(--brand-600);
+  box-shadow: var(--ring);
+}
 .clear-search {
   position: absolute;
   right: 1rem;
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--ink-400);
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  line-height: 1;
 }
 
-.filter-select {
-  padding: 0.75rem 2rem 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background: white;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1.2rem;
-}
-
-.loading-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
+.loading-skeleton { display: flex; flex-direction: column; gap: .5rem; }
 .skeleton-row {
-  display: flex;
-  gap: 1rem;
+  display: flex; gap: 1rem;
   padding: 1rem;
-  background: #f1f5f9;
-  border-radius: 0.5rem;
+  background: var(--ink-100);
+  border-radius: var(--r-md);
   animation: pulse 1.5s infinite;
 }
-
-.skeleton-cell {
-  height: 1rem;
-  background: #e2e8f0;
-  border-radius: 0.25rem;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
+.skeleton-cell { height: 1rem; background: var(--ink-200); border-radius: 4px; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  background: #f8fafc;
-  border-radius: 1rem;
+  padding: 3.5rem 2rem;
+  background: linear-gradient(135deg, var(--ink-50), white);
+  border-radius: var(--r-lg);
+  border: 1px dashed var(--ink-200);
 }
-
 .empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  opacity: 0.6;
+  width: 64px; height: 64px;
+  margin: 0 auto 1rem;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--brand-50);
+  color: var(--brand-600);
+  font-size: 1.7rem;
+  font-weight: 700;
 }
-
-.empty-state h3 {
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-  color: #334155;
-}
-
-.empty-state p {
-  color: #94a3b8;
-  margin-bottom: 1.5rem;
-}
-
+.empty-state h3 { font-size: 1.15rem; margin-bottom: .35rem; color: var(--ink-800); }
+.empty-state p { color: var(--ink-500); margin-bottom: 1.25rem; font-size: .9rem; }
 .btn-clear-filters {
-  background: none;
-  border: 1px solid #2a5298;
-  color: #2a5298;
-  padding: 0.5rem 1.5rem;
-  border-radius: 999px;
+  background: white;
+  border: 1px solid var(--brand-600);
+  color: var(--brand-700);
+  padding: .5rem 1.35rem;
+  border-radius: var(--r-full);
   cursor: pointer;
+  font-weight: 500;
+  font-size: .85rem;
 }
 
-.reports-table-container {
-  overflow-x: auto;
-}
-
-.reports-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
+.reports-table-container { overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--ink-200); }
+.reports-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .reports-table th {
   text-align: left;
-  padding: 1rem 0.75rem;
-  background: #f8fafc;
-  color: #475569;
+  padding: .9rem 1rem;
+  background: var(--ink-50);
+  color: var(--ink-600);
   font-weight: 600;
-  border-bottom: 2px solid #e2e8f0;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-bottom: 1px solid var(--ink-200);
 }
-
 .reports-table td {
-  padding: 1rem 0.75rem;
-  border-bottom: 1px solid #e9eef2;
+  padding: 1rem;
+  border-bottom: 1px solid var(--ink-100);
   vertical-align: middle;
+  color: var(--ink-700);
 }
-
-.report-row:hover {
-  background: #f1f5f9;
-}
-
-.report-id {
-  font-family: monospace;
-  font-weight: 600;
-  color: #1e3c72;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.badge.severity {
-  background: #f1f5f9;
-  color: #334155;
-}
-.badge.severity.low { background: #dbeafe; color: #1e3c72; }
-.badge.severity.medium { background: #fed7aa; color: #9a3412; }
-.badge.severity.high { background: #fee2e2; color: #b91c1c; }
-.badge.severity.critical { background: #fecaca; color: #7f1d1d; }
-
-.badge.status {
-  background: #f1f5f9;
-}
-.badge.status.pending { background: #fed7aa; color: #92400e; }
-.badge.status.in-progress { background: #cffafe; color: #0e7490; }
-.badge.status.resolved { background: #d1fae5; color: #065f46; }
+.reports-table tbody tr:last-child td { border-bottom: none; }
+.report-row { transition: background .15s; }
+.report-row:hover { background: var(--brand-50); }
+.report-id { font-family: ui-monospace, monospace; font-weight: 700; color: var(--brand-700); }
+.report-type { font-weight: 500; }
 
 .btn-view {
-  background: none;
-  border: 1px solid #cbd5e1;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .4rem .85rem;
+  border-radius: var(--r-md);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-  color: #334155;
-  transition: all 0.2s;
+  gap: .35rem;
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--ink-700);
+  transition: all .18s;
 }
+.btn-view:hover { background: var(--brand-700); color: white; border-color: var(--brand-700); }
+.btn-view-icon { font-size: .85rem; }
 
-.btn-view:hover {
-  background: #1e3c72;
-  color: white;
-  border-color: #1e3c72;
-}
-
-/* ===== CHAT ===== */
+/* ============================================================
+   CHAT
+   ============================================================ */
 .chat-layout {
   display: flex;
-  gap: 1.5rem;
-  height: calc(100vh - 200px);
-  min-height: 500px;
+  gap: 1.25rem;
+  height: calc(100vh - 180px);
+  min-height: 520px;
 }
 .chat-history-sidebar {
-  width: 280px;
-  background: white;
-  border-radius: 1rem;
+  width: 270px;
+  flex-shrink: 0;
+  background: var(--card);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-xl);
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  gap: .85rem;
+  box-shadow: var(--sh-sm);
   overflow: hidden;
 }
-
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 0.5rem;
-}
-
-.sidebar-header h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1e3c72;
-}
-
+.sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 0 .35rem; }
+.sidebar-header h3 { font-size: 1rem; font-weight: 700; color: var(--brand-800); }
 .btn-new-chat {
-  background: linear-gradient(135deg, #f97316, #fb923c);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
   border: none;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.8rem;
+  padding: .35rem .75rem;
+  border-radius: var(--r-sm);
+  font-size: .75rem;
+  font-weight: 600;
   cursor: pointer;
 }
-
-.chat-history-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
+.chat-history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: .35rem; }
 .chat-history-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  background: #f8fafc;
+  gap: .5rem;
+  padding: .7rem .75rem;
+  border-radius: var(--r-md);
+  background: var(--ink-50);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all .15s;
+  border: 1px solid transparent;
 }
-
-.chat-history-item:hover {
-  background: #f1f5f9;
-}
-
+.chat-history-item:hover { background: var(--brand-50); }
 .chat-history-item.active {
-  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
-  border-left: 4px solid #f97316;
+  background: linear-gradient(135deg, #eef4ff, #e6efff);
+  border-color: var(--brand-100);
+  border-left: 3px solid var(--accent-500);
 }
-
-.chat-item-content {
-  flex: 1;
-  overflow: hidden;
-}
-
+.chat-item-content { flex: 1; min-width: 0; }
 .chat-summary {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: .82rem;
+  color: var(--ink-800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 0.25rem;
+  margin-bottom: .15rem;
 }
-
-.chat-meta {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.7rem;
-  color: #64748b;
-}
-
+.chat-meta { display: flex; gap: .5rem; font-size: .68rem; color: var(--ink-400); }
 .btn-delete-chat {
   background: none;
   border: none;
-  font-size: 1rem;
+  color: var(--ink-400);
+  font-size: 1.05rem;
   cursor: pointer;
-  opacity: 0.6;
-  padding: 0.25rem;
+  padding: .15rem .3rem;
+  line-height: 1;
+  border-radius: var(--r-sm);
 }
-
-.btn-delete-chat:hover {
-  opacity: 1;
-}
-
-.empty-history {
-  text-align: center;
-  padding: 2rem;
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
+.btn-delete-chat:hover { color: var(--danger); background: rgba(239,68,68,.08); }
+.empty-history { text-align: center; padding: 2rem 1rem; color: var(--ink-400); font-size: .82rem; }
 
 .chat-main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: white;
-  border-radius: 1rem;
+  background: var(--card);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-xl);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: var(--sh-sm);
+  min-width: 0;
 }
-
 .chat-main-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  padding: .9rem 1.25rem;
+  border-bottom: 1px solid var(--ink-200);
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: .75rem;
+  background: linear-gradient(180deg, white, var(--ink-50));
 }
-
 .btn-toggle-sidebar {
-  background: none;
-  border: 1px solid #cbd5e1;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .3rem .7rem;
+  border-radius: var(--r-sm);
   cursor: pointer;
   display: none;
+  font-size: .8rem;
 }
-
-.chat-title {
-  flex: 1;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #1e3c72;
-}
-
-.chat-header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-clear,
-.btn-new-chat-header {
-  background: none;
-  border: 1px solid #e2e8f0;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.5rem;
+.chat-title { flex: 1; font-size: 1.05rem; font-weight: 700; color: var(--brand-800); }
+.chat-header-actions { display: flex; gap: .4rem; }
+.btn-clear, .btn-new-chat-header {
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .35rem .75rem;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: .78rem;
+  color: var(--ink-600);
+  font-weight: 500;
+  transition: all .15s;
 }
-
-.btn-new-chat-header {
-  background: #1e3c72;
-  color: white;
-  border-color: #1e3c72;
-}
+.btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+.btn-new-chat-header { background: var(--brand-700); color: white; border-color: var(--brand-700); }
+.btn-new-chat-header:hover { background: var(--brand-800); }
 
 .chatbot-card {
   flex: 1;
   display: flex;
   flex-direction: column;
   border-radius: 0;
+  border: none;
   box-shadow: none;
-  padding: 1rem;
-  min-height: 0;  
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  background: transparent;
 }
-
-.chatbot-header {
-  margin-bottom: 1rem;
-}
-
+.chatbot-header { display: none; }
 .chatbot-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 0;          /* important for flex children to shrink */
+  min-height: 0;
 }
-
 .chatbot-messages {
   flex: 1;
   overflow-y: auto;
-  padding-right: 0.5rem;
-  margin-bottom: 1rem;
-  min-height: 0;     
+  padding: 1.25rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
 }
-
-.chatbot-message {
-  margin-bottom: 1rem;
-  max-width: 80%;
-}
-
-.chatbot-message.user {
-  margin-left: auto;
-  text-align: right;
-}
-
+.chatbot-message { max-width: 78%; display: flex; flex-direction: column; }
+.chatbot-message.user { margin-left: auto; align-items: flex-end; }
+.chatbot-message.assistant { margin-right: auto; align-items: flex-start; }
 .message-content {
-  display: inline-block;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  background: #f1f5f9;
-  color: #1e293b;
+  padding: .7rem 1rem;
+  border-radius: 16px;
+  background: var(--ink-100);
+  color: var(--ink-800);
+  font-size: .9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
 }
-
+.chatbot-message.assistant .message-content {
+  background: var(--ink-100);
+  border-bottom-left-radius: 4px;
+}
 .chatbot-message.user .message-content {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
+  border-bottom-right-radius: 4px;
 }
+.message-time { font-size: .68rem; color: var(--ink-400); margin-top: .25rem; padding: 0 .35rem; }
 
-.message-time {
-  font-size: 0.7rem;
-  color: #94a3b8;
-  margin-top: 0.25rem;
-}
-
-.chatbot-quick-replies {
-  margin: 1rem 0;
-}
-
-.quick-replies-title {
-  font-size: 0.85rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
-}
-
-.quick-replies-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
+.chatbot-quick-replies { margin: 1rem 0 .25rem; }
+.quick-replies-title { font-size: .78rem; color: var(--ink-500); margin-bottom: .5rem; font-weight: 500; }
+.quick-replies-buttons { display: flex; flex-wrap: wrap; gap: .5rem; }
 .quick-replies-buttons button {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
+  background: white;
+  border: 1px solid var(--ink-200);
+  padding: .45rem .9rem;
+  border-radius: var(--r-full);
+  font-size: .8rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all .15s;
+  color: var(--ink-700);
+  font-weight: 500;
 }
+.quick-replies-buttons button:hover { background: var(--brand-50); border-color: var(--brand-600); color: var(--brand-700); }
 
-.quick-replies-buttons button:hover {
-  background: #e2e8f0;
-}
-
-.chatbot-typing {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.typing-dots {
-  display: flex;
-  gap: 0.2rem;
-}
-
+.chatbot-typing { display: flex; align-items: center; gap: .5rem; font-size: .8rem; color: var(--ink-500); padding: .35rem .5rem; }
+.typing-dots { display: flex; gap: .2rem; }
 .typing-dots span {
-  width: 6px;
-  height: 6px;
-  background: #94a3b8;
+  width: 6px; height: 6px;
+  background: var(--ink-400);
   border-radius: 50%;
   animation: typing 1.4s infinite;
 }
-
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
-}
+.typing-dots span:nth-child(2) { animation-delay: .2s; }
+.typing-dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes typing { 0%,60%,100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-5px); opacity: 1; } }
 
 .chatbot-input-area {
-  flex-shrink: 0;         /* prevent it from being squeezed */
-  border-top: 1px solid #e2e8f0;
-  padding: 1rem 0 0 0;
+  flex-shrink: 0;
+  border-top: 1px solid var(--ink-200);
+  padding: .9rem 1.25rem 1rem;
   background: white;
-  margin-bottom: -1rem; 
 }
-
-.chatbot-input-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-end;
-}
-
+.chatbot-input-wrapper { display: flex; gap: .5rem; align-items: flex-end; }
 .chatbot-input-wrapper textarea {
   flex: 1;
-  min-height: 44px !important;   /* force visible height */
-  height: auto !important;        /* let it grow naturally */
+  min-height: 44px;
+  height: auto;
+  max-height: 120px;
   resize: none;
-  padding: 0.75rem 1rem;
-  border-radius: 20px;        /* softer, not full pill */
-  border: 1px solid #e2e8f0;
+  padding: .65rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--ink-200);
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: .9rem;
   line-height: 1.5;
   background: white;
+  transition: all .15s;
 }
-
+.chatbot-input-wrapper textarea:focus {
+  outline: none;
+  border-color: var(--brand-600);
+  box-shadow: var(--ring);
+}
 .btn-send {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 999px;
+  padding: .7rem 1.35rem;
+  border-radius: var(--r-full);
   font-weight: 600;
+  font-size: .85rem;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity .15s, transform .15s;
+  box-shadow: var(--sh-brand);
 }
+.btn-send:hover:not(:disabled) { transform: translateY(-1px); }
+.btn-send:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.input-hint { font-size: .68rem; color: var(--ink-400); margin-top: .35rem; text-align: right; }
 
-.btn-send:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.input-hint {
-  font-size: 0.7rem;
-  color: #94a3b8;
-  margin-top: 0.25rem;
-  text-align: right;
-}
-
-/* ===== PROFILE ===== */
-.profile-card {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
+/* ============================================================
+   PROFILE
+   ============================================================ */
+.profile-card { max-width: 780px; margin: 0 auto; }
 .profile-title {
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #1e3c72, #f97316);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 2rem;
+  letter-spacing: -.02em;
+  color: var(--ink-900);
+  margin-bottom: 1.75rem;
   text-align: center;
 }
-
-.profile-avatar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
+.profile-avatar { display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; gap: .85rem; }
 .avatar-wrapper {
-  width: 120px;
-  height: 120px;
+  width: 116px; height: 116px;
   border-radius: 50%;
   overflow: hidden;
   border: 4px solid white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-bottom: 1rem;
+  box-shadow: 0 0 0 2px var(--brand-100), var(--sh-md);
 }
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
+.avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .avatar-upload {
-  background: #f1f5f9;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
+  background: var(--ink-100);
+  padding: .45rem 1rem;
+  border-radius: var(--r-full);
+  font-size: .82rem;
+  font-weight: 500;
   cursor: pointer;
-  border: 1px solid #cbd5e1;
-  transition: all 0.2s;
+  border: 1px solid var(--ink-200);
+  transition: all .15s;
+  color: var(--ink-700);
 }
+.avatar-upload:hover { background: var(--brand-50); border-color: var(--brand-600); color: var(--brand-700); }
 
-.avatar-upload:hover {
-  background: #e2e8f0;
-}
-
-.profile-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.form-group.full {
-  grid-column: span 2;
-}
-
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 2rem; }
+.form-group.full { grid-column: span 2; }
 .form-group label {
   display: block;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
-  color: #334155;
+  font-size: .8rem;
+  margin-bottom: .35rem;
+  color: var(--ink-600);
 }
-
-.form-group input,
-.form-group textarea {
+.form-group input, .form-group textarea {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  font-size: 1rem;
-  background: #f9fbfd;
+  padding: .7rem .95rem;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-md);
+  font-size: .9rem;
+  background: var(--ink-50);
+  font-family: inherit;
+  transition: all .15s;
 }
-
-.form-group input:disabled {
-  background: #f1f5f9;
-  color: #64748b;
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--brand-600);
+  background: white;
+  box-shadow: var(--ring);
 }
+.form-group input:disabled { background: var(--ink-100); color: var(--ink-500); }
 
-.profile-actions {
-  display: flex;
-  justify-content: center;
-}
-
+.profile-actions { display: flex; justify-content: center; }
 .btn-save {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
   color: white;
   border: none;
-  padding: 0.75rem 3rem;
-  border-radius: 999px;
+  padding: .75rem 2.5rem;
+  border-radius: var(--r-full);
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: .95rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform .18s, box-shadow .18s;
+  box-shadow: var(--sh-brand);
+}
+.btn-save:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(30,60,114,.55); }
+
+/* ============================================================
+   LEGAL
+   ============================================================ */
+.legal-search-wrap { position: relative; display: flex; align-items: center; margin-bottom: 1.5rem; }
+.legal-search-icon { position: absolute; left: 1rem; color: var(--ink-400); font-size: 1rem; pointer-events: none; }
+.legal-search-input {
+  width: 100%;
+  padding: .75rem 1rem .75rem 2.6rem;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-full);
+  font-size: .9rem;
+  outline: none;
+  transition: all .15s;
+  background: white;
+}
+.legal-search-input:focus { border-color: var(--brand-600); box-shadow: var(--ring); }
+.legal-search-clear {
+  position: absolute; right: 1rem;
+  background: none; border: none;
+  color: var(--ink-400); cursor: pointer;
+  font-size: 1.1rem; padding: 0; line-height: 1;
 }
 
-.btn-save:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(30, 60, 114, 0.4);
+.legal-grid { display: flex; flex-direction: column; gap: .85rem; }
+.legal-entry-card {
+  background: white;
+  border: 1px solid var(--ink-200);
+  border-left: 4px solid var(--brand-600);
+  border-radius: var(--r-lg);
+  padding: 1.25rem 1.4rem;
+  transition: box-shadow .2s, transform .2s;
+}
+.legal-entry-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
+.legal-entry-header { display: flex; justify-content: space-between; align-items: flex-start; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+.legal-tags { display: flex; gap: .5rem; flex-wrap: wrap; }
+.legal-cat-tag {
+  display: inline-block;
+  padding: .22rem .7rem;
+  border-radius: var(--r-full);
+  font-size: .7rem;
+  font-weight: 700;
+  border: 1px solid;
+  letter-spacing: .02em;
+}
+.legal-num-tag {
+  display: inline-block;
+  background: var(--accent-100);
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  padding: .22rem .7rem;
+  border-radius: var(--r-full);
+  font-size: .7rem;
+  font-weight: 700;
+}
+.legal-date-tag { font-size: .72rem; color: var(--ink-500); white-space: nowrap; padding-top: .2rem; }
+.legal-entry-title { font-size: .98rem; font-weight: 700; color: var(--ink-900); margin-bottom: .4rem; }
+.legal-entry-desc { font-size: .85rem; color: var(--ink-600); line-height: 1.6; margin-bottom: 1rem; }
+.legal-view-btn {
+  background: linear-gradient(135deg, var(--brand-700), var(--brand-600));
+  color: white;
+  border: none;
+  padding: .45rem 1.1rem;
+  border-radius: var(--r-md);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.legal-view-btn:hover { opacity: .9; }
+.legal-clear-btn {
+  margin-top: .75rem;
+  background: white;
+  border: 1px solid var(--brand-600);
+  color: var(--brand-700);
+  padding: .5rem 1.35rem;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 500;
 }
 
-/* ===== FOOTER ===== */
+.legal-detail-modal { max-width: 700px !important; }
+.legal-modal-tags { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .35rem; }
+.legal-modal-desc { font-size: .9rem; color: var(--ink-600); line-height: 1.65; margin-bottom: 1.35rem; }
+.legal-statement-box {
+  background: var(--ink-50);
+  border: 1px solid var(--ink-200);
+  border-radius: var(--r-md);
+  padding: 1.15rem;
+  margin-bottom: 1rem;
+}
+.legal-statement-label {
+  font-size: .72rem; font-weight: 700; color: var(--brand-700);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: .65rem;
+}
+.legal-statement-text { font-size: .88rem; color: var(--ink-700); line-height: 1.75; white-space: pre-wrap; }
+.legal-modal-meta { font-size: .82rem; color: var(--ink-500); padding-top: .75rem; border-top: 1px solid var(--ink-200); }
+.modal-footer-actions { display: flex; justify-content: flex-end; padding: 1rem 1.75rem 1.5rem; }
+.btn-modal-close {
+  background: var(--ink-100);
+  border: 1px solid var(--ink-200);
+  color: var(--ink-700);
+  padding: .55rem 1.35rem;
+  border-radius: var(--r-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-modal-close:hover { background: var(--ink-200); }
+
+/* ============================================================
+   REPORT DETAILS MODAL
+   ============================================================ */
+.media-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+.media-thumb {
+  width: 100px; height: 100px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--ink-200);
+  transition: transform .15s;
+}
+.media-thumb:hover { transform: scale(1.03); }
+.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.detail-row { margin-bottom: .85rem; padding-bottom: .6rem; border-bottom: 1px solid var(--ink-100); }
+.detail-row:last-child { border-bottom: none; }
+.detail-row strong { display: inline-block; min-width: 130px; color: var(--ink-800); font-size: .85rem; }
+.detail-row p { margin-top: .35rem; color: var(--ink-600); line-height: 1.55; font-size: .88rem; }
+.status-badge {
+  padding: .2rem .7rem;
+  border-radius: var(--r-full);
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  display: inline-block;
+}
+.status-badge.pending { background: #fed7aa; color: #92400e; }
+.status-badge.in-progress { background: #cffafe; color: #0e7490; }
+.status-badge.resolved { background: #d1fae5; color: #065f46; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
 .footer {
   background: white;
-  border-top: 1px solid #e9eef2;
+  border-top: 1px solid var(--ink-200);
   margin-top: auto;
 }
-
 .footer-inner {
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 1.5rem 2rem;
+  padding: 1.1rem 2rem;
   text-align: center;
-  color: #64748b;
-  font-size: 0.9rem;
+  color: var(--ink-500);
+  font-size: .82rem;
 }
 
-/* ===== RESPONSIVE TWEAKS ===== */
+/* ============================================================
+   LEAFLET Z-INDEX FIX
+   ============================================================ */
+.leaflet-pane, .leaflet-control { z-index: 1 !important; }
+.leaflet-top, .leaflet-bottom { z-index: 2 !important; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 1023px) {
-  .layout {
-    flex-direction: column;
-  }
-  .nav {
-    width: 100%;
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 1rem;
-  }
-  .navbtn {
-    width: auto;
-  }
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .chat-history-sidebar { width: 240px; }
 }
 
 @media (max-width: 767px) {
-  .topbar-inner {
-    padding: 0.75rem 1rem;
+  .topbar-inner { padding: .75rem 1rem; }
+  .brand-text .brand-subtitle { display: none; }
+
+  .main { padding: 1rem; }
+
+  .nav {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 50;
+    border-radius: 0 var(--r-xl) var(--r-xl) 0;
+    transform: translateX(-100%);
+    transition: transform .3s ease;
+    overflow-y: auto;
+    box-shadow: var(--sh-xl);
   }
-  .brand-text {
-    display: none;
+  .nav.mobile-open { transform: translateX(0); }
+  .nav-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .25rem .35rem .85rem;
+    border-bottom: 1px solid var(--ink-200);
+    margin-bottom: .5rem;
   }
-  .main {
-    padding: 0 1rem;
-    margin-top: -400px;
+  .nav-brand-title { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-500); }
+  .nav-close {
+    background: var(--ink-100);
+    border: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--ink-500);
+    display: grid; place-items: center;
   }
-  .two {
-    grid-template-columns: 1fr;
+  .hamburger { display: flex; }
+
+  .two { grid-template-columns: 1fr; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: span 1; }
+
+  .chat-layout { flex-direction: column; height: auto; min-height: 0; }
+  .chat-history-sidebar { width: 100%; height: 260px; }
+  .chat-history-sidebar.hidden { display: none; }
+  .btn-toggle-sidebar { display: inline-flex; }
+  .chatbot-card { min-height: 500px; }
+
+  .mapTop { flex-direction: column; }
+  .mapActions { width: 100%; }
+  .mapActions .btn { flex: 1; }
+  .mapFrame { height: 380px; }
+
+  .reports-container { padding: 1.25rem; }
+  .reports-table th, .reports-table td { padding: .65rem .6rem; font-size: .8rem; }
+  .card { padding: 1.35rem; border-radius: var(--r-lg); }
+}
+
+@media (max-width: 519px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .right .role { display: none; }
+  .reports-header { flex-direction: column; align-items: stretch; }
+  .btn-new-report { justify-content: center; }
+  .actions { flex-direction: column; }
+  .actions .btn { width: 100%; }
+  .input-with-actions { flex-direction: column; }
+  .input-actions { width: 100%; }
+  .input-actions .btn-small { flex: 1; }
+  .route-stats { flex-direction: column; gap: .5rem; }
+
+  /* Card-style responsive table */
+  .reports-table thead { display: none; }
+  .reports-table, .reports-table tbody, .reports-table tr, .reports-table td { display: block; width: 100%; }
+  .reports-table tr {
+    margin-bottom: .85rem;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: .5rem .75rem;
+    background: var(--ink-50);
   }
-  .profile-grid {
-    grid-template-columns: 1fr;
+  .reports-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .4rem 0;
+    border: none;
+    border-bottom: 1px dashed var(--ink-200);
   }
-  .form-group.full {
-    grid-column: span 1;
-  }
-  .chat-layout {
-    flex-direction: column;
-    height: auto;
-  }
-  .chat-history-sidebar {
-    width: 100%;
-    height: 300px;
-  }
-  .btn-toggle-sidebar {
-    display: inline-flex;
-  }
-  .chat-history-sidebar.hidden {
-    display: none;
-  }
-  .mapTop {
-    flex-direction: column;
-  }
-  .mapActions {
-    width: 100%;
-    justify-content: stretch;
-  }
-  .mapActions .btn {
-    flex: 1;
+  .reports-table td:last-child { border-bottom: none; }
+  .reports-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-500);
   }
 }
-
-@media (max-width: 479px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  .right .role {
-    display: none;
-  }
-}
-
-/* ===== LEGAL COMPLIANCE ===== */
-.legal-search-wrap { position: relative; display: flex; align-items: center; margin-bottom: 1.5rem; }
-.legal-search-icon { position: absolute; left: 1rem; color: #94a3b8; font-size: 1rem; }
-.legal-search-input { width: 100%; padding: 0.75rem 1rem 0.75rem 2.75rem; border: 1.5px solid #e2e8f0; border-radius: 999px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; background: white; }
-.legal-search-input:focus { border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42,82,152,0.08); }
-.legal-search-clear { position: absolute; right: 1rem; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.1rem; padding: 0; line-height: 1; }
-.legal-grid { display: flex; flex-direction: column; gap: 1rem; }
-.legal-entry-card { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #2a5298; border-radius: 1rem; padding: 1.25rem 1.5rem; transition: box-shadow 0.2s, transform 0.2s; }
-.legal-entry-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); transform: translateY(-2px); }
-.legal-entry-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
-.legal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.legal-cat-tag { display: inline-block; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid; }
-.legal-num-tag { display: inline-block; background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
-.legal-date-tag { font-size: 0.75rem; color: #64748b; white-space: nowrap; padding-top: 0.2rem; }
-.legal-entry-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem; }
-.legal-entry-desc { font-size: 0.875rem; color: #475569; line-height: 1.6; margin-bottom: 1rem; }
-.legal-view-btn { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none; padding: 0.5rem 1.25rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.legal-view-btn:hover { opacity: 0.9; }
-.legal-clear-btn { margin-top: 1rem; background: none; border: 1.5px solid #2a5298; color: #2a5298; padding: 0.5rem 1.5rem; border-radius: 999px; cursor: pointer; font-size: 0.9rem; }
-.legal-detail-modal { max-width: 700px !important; }
-.legal-modal-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
-.legal-modal-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 1.5rem; }
-.legal-statement-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; }
-.legal-statement-label { font-size: 0.8rem; font-weight: 700; color: #2a5298; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
-.legal-statement-text { font-size: 0.9rem; color: #374151; line-height: 1.8; white-space: pre-wrap; }
-.legal-modal-meta { font-size: 0.85rem; color: #64748b; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; }
-.modal-footer-actions { display: flex; justify-content: flex-end; padding: 1rem 2rem 1.5rem; }
-.btn-modal-close { background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #334155; padding: 0.6rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-.btn-modal-close:hover { background: #e2e8f0; }
-
-/* Transport Mode Selector */
-.mode-selector {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-.mode-btn {
-  flex: 1;
-  min-width: 70px;
-  padding: 0.5rem 0.75rem;
-  border: 2px solid #e2e8f0;
-  background: white;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-}
-
-.mode-btn:hover {
-  border-color: #2a5298;
-  background: #f0f4ff;
-}
-
-.mode-btn.active {
-  border-color: #2a5298;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-}
-
-.mode-icon {
-  font-size: 1.3rem;
-}
-
-.mode-label {
-  font-weight: 500;
-}
-
-.mode-hint {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  background: #f8fafc;
-  border-radius: 0.5rem;
-}
-
-/* Report detail modal media */
-.media-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.media-thumb {
-  width: 100px;
-  height: 100px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-}
-.media-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.detail-row {
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f1f5f9;
-}
-.detail-row strong {
-  display: inline-block;
-  width: 140px;
-  color: #1e293b;
-}
-.detail-row p {
-  margin-top: 4px;
-  color: #475569;
-  line-height: 1.5;
-}
-
-.announcement-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.action-btn {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s;
-}
-
-.action-btn:hover {
-  background: #eef2ff;
-  border-color: #2a5298;
-}
-
-.image-btn {
-  color: #1e3c72;
-}
-
-.map-btn {
-  color: #2a5298;
-}
-
-.vehicle-tag {
-  display: inline-block;
-  background: #eef2ff;
-  color: #1e40af;
-  padding: 0.25rem 0.75rem;
-  border-radius: 2rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-right: 0.5rem;
-  margin-top: 0.5rem;
-  border: 1px solid #dbeafe;
-  transition: all 0.2s;
-}
-.vehicle-tag:hover {
-  background: #e0e7ff;
-  transform: translateY(-1px);
-}
-
-#user-map,
-#incident-map,
-#alert-map,
-#location-picker-map {
-  touch-action: none;        /* prevents scroll interference */
-}
-
-}
-
 </style>
