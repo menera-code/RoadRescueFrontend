@@ -36,7 +36,6 @@ const role = "Citizen"
 const roleClass = computed(() => "role-user")
 const token = localStorage.getItem("access_token")
 const windowWidth = ref(0)
-const mobileMenuOpen = ref(false)
 
 /* Shared nav model for desktop sidebar + mobile bottom bar */
 const navItems = [
@@ -45,7 +44,6 @@ const navItems = [
   { key: "map",           icon: "◎", label: "Map"      },
   { key: "myreports",     icon: "▤", label: "Reports"  },
   { key: "announcements", icon: "◔", label: "Alerts"   },
-  { key: "chat",          icon: "✦", label: "Chat"     },
   { key: "legal",         icon: "§", label: "Legal"    },
   { key: "profile",       icon: "◉", label: "Profile"  },
 ]
@@ -77,10 +75,6 @@ const go = async (key) => {
       break
     case "report":
       await useCurrentLocationForReport()
-      break
-    case "chat":
-      loadChatHistoryList()
-      chatbotScrollToBottom()
       break
     case "myreports":
       await loadMyReports()
@@ -558,336 +552,6 @@ const statusClass = (status) => {
       return "warn"
     default:
       return ""
-  }
-}
-
-// ============================================================
-//  CHATBOT
-// ============================================================
-const chatbotMessages = ref([])
-const chatbotInput = ref("")
-const chatbotLoading = ref(false)
-const showQuickReplies = ref(true)
-const quickReplies = ref(["How do I report an incident?", "Emergency contact numbers", "Traffic situation in Calapan"])
-const chatHistoryList = ref([])
-const selectedChatId = ref(null)
-const showHistorySidebar = ref(false)
-const chatInput = ref(null)
-const isUserAtBottom = ref(true)
-
-const saveChatHistory = () => {
-  try {
-    localStorage.setItem("chatbotHistory", JSON.stringify(chatbotMessages.value))
-  } catch (e) {
-    console.warn("Could not save chat history:", e)
-  }
-}
-
-const formatChatTime = (isoString) => {
-  try {
-    const date = new Date(isoString)
-    const now = new Date()
-    const diffMs = now - date
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-    if (diffMins < 1) return "Just now"
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
-    return date.toLocaleDateString([], { month: "short", day: "numeric" })
-  } catch (e) {
-    return "Recently"
-  }
-}
-
-const loadChatHistory = async () => {
-  try {
-    console.log("Loading chat history from backend...")
-    const response = await api.get("/chat/history?limit=50")
-    console.log("Backend response:", response.data)
-    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      chatbotMessages.value = response.data.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-        timestamp: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      }))
-      showQuickReplies.value = chatbotMessages.value.length <= 1
-    } else {
-      const savedHistory = JSON.parse(localStorage.getItem("chatbotHistory"))
-      if (savedHistory && savedHistory.length > 0) {
-        chatbotMessages.value = savedHistory
-        showQuickReplies.value = savedHistory.length <= 1
-      } else {
-        chatbotMessages.value = [
-          {
-            role: "assistant",
-            content: "Hello 👋 I'm RESQAPP Assistant. How can I help you with emergency services in Calapan City today?",
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          },
-        ]
-        showQuickReplies.value = true
-      }
-    }
-  } catch (error) {
-    console.error("Failed to load chat history from backend:", error)
-    const savedHistory = JSON.parse(localStorage.getItem("chatbotHistory"))
-    if (savedHistory && savedHistory.length > 0) {
-      chatbotMessages.value = savedHistory
-      showQuickReplies.value = savedHistory.length <= 1
-    } else {
-      chatbotMessages.value = [
-        {
-          role: "assistant",
-          content: "Hello 👋 I'm RESQAPP Assistant. How can I help you today?",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]
-      showQuickReplies.value = true
-    }
-  }
-}
-
-const clearChatHistory = async () => {
-  if (confirm("Clear all chat history (both local and server)?")) {
-    try {
-      await api.delete("/chat/history")
-    } catch (error) {
-      console.error("Could not clear server history:", error)
-    }
-    localStorage.removeItem("chatbotHistory")
-    chatbotMessages.value = [
-      {
-        role: "assistant",
-        content: "Chat history cleared. How can I help you today?",
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]
-    showQuickReplies.value = true
-  }
-}
-
-const sendChatbotMessage = async () => {
-  const userMessage = chatbotInput.value.trim()
-  if (!userMessage || chatbotLoading.value) return
-
-  const token = localStorage.getItem("access_token")
-  if (!token) {
-    alert("Please log in again")
-    router.push("/")
-    return
-  }
-
-  if (showQuickReplies.value) showQuickReplies.value = false
-
-  chatbotMessages.value.push({
-    role: "user",
-    content: userMessage,
-    timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-  })
-  chatbotInput.value = ""
-  chatbotLoading.value = true
-  adjustTextareaHeight()
-  chatbotScrollToBottom()
-
-  try {
-    console.log("Sending chat message with token:", token.substring(0, 20) + "...")
-    const response = await api.post("/chat/message", {
-      message: userMessage,
-      conversation_history: chatbotMessages.value.slice(0, -1),
-    })
-    console.log("Chat response received:", response.data)
-
-    chatbotMessages.value.push({
-      role: "assistant",
-      content: response.data.content,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    })
-
-    if (response.data.quick_replies && response.data.quick_replies.length > 0) {
-      quickReplies.value = response.data.quick_replies
-    }
-    saveToHistoryList()
-    saveChatHistory()
-  } catch (error) {
-    console.error("Chatbot error details:", {
-      status: error.response?.status,
-      data: error.response?.data,
-      headers: error.response?.headers,
-    })
-
-    let fallbackResponse = ""
-    if (error.response?.status === 401) {
-      fallbackResponse = "Session expired. Please log in again."
-      setTimeout(() => {
-        localStorage.removeItem("access_token")
-        router.push("/")
-      }, 2000)
-    } else if (error.response?.status === 500) {
-      fallbackResponse = "AI service is temporarily unavailable. Please try again later."
-    } else {
-      const lowerMessage = userMessage.toLowerCase()
-      if (lowerMessage.includes("report") || lowerMessage.includes("incident")) {
-        fallbackResponse =
-          "To report an incident, go to 'Create Report' in your dashboard. For emergencies, call 911 or Calapan Rescue at 288-1111."
-      } else if (lowerMessage.includes("emergency") || lowerMessage.includes("help")) {
-        fallbackResponse =
-          "Emergency contacts: 🚒 Fire (288-3333) | 🚓 Police (288-4444) | 🚑 Rescue (288-1111). For immediate danger, call 911."
-      } else if (lowerMessage.includes("traffic") || lowerMessage.includes("road")) {
-        fallbackResponse = "For traffic updates in Calapan, contact City Traffic Management at 288-2222."
-      } else {
-        fallbackResponse = "I'm having trouble connecting to the AI service. Please try again in a moment."
-      }
-    }
-
-    chatbotMessages.value.push({
-      role: "assistant",
-      content: fallbackResponse,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    })
-    saveToHistoryList()
-    saveChatHistory()
-  } finally {
-    chatbotLoading.value = false
-    chatbotScrollToBottom()
-  }
-}
-
-const useQuickReply = (text) => {
-  chatbotInput.value = text
-  sendChatbotMessage()
-}
-
-const adjustTextareaHeight = () => {
-  nextTick(() => {
-    const el = chatInput.value
-    if (!el) return
-    el.style.height = "auto"
-    el.style.height = Math.min(el.scrollHeight, 120) + "px"
-  })
-}
-
-const handleKeyDown = (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault()
-    sendChatbotMessage()
-  }
-}
-
-const chatbotScrollToBottom = () => {
-  if (!isUserAtBottom.value) return
-  nextTick(() => {
-    const el = document.querySelector(".chatbot-messages")
-    if (el) el.scrollTop = el.scrollHeight
-  })
-}
-
-const loadChatHistoryList = async () => {
-  try {
-    const savedList = JSON.parse(localStorage.getItem("chatHistoryList") || "[]")
-    chatHistoryList.value = savedList
-    if (selectedChatId.value) {
-      loadSelectedChat()
-    }
-  } catch (error) {
-    console.error("Error loading chat history list:", error)
-  }
-}
-
-const saveToHistoryList = () => {
-  try {
-    if (chatbotMessages.value.length <= 1) return
-    const existingList = JSON.parse(localStorage.getItem("chatHistoryList") || "[]")
-    const firstUserMessage = chatbotMessages.value.find((msg) => msg.role === "user")
-    const summary = firstUserMessage
-      ? firstUserMessage.content.substring(0, 50) + (firstUserMessage.content.length > 50 ? "..." : "")
-      : "New Chat"
-    const timestamp = new Date().toISOString()
-
-    if (selectedChatId.value) {
-      const chatIndex = existingList.findIndex((chat) => chat.id === selectedChatId.value)
-      if (chatIndex !== -1) {
-        existingList[chatIndex] = {
-          ...existingList[chatIndex],
-          summary,
-          timestamp,
-          messageCount: chatbotMessages.value.length,
-          messages: [...chatbotMessages.value],
-        }
-      }
-    } else {
-      const newChat = {
-        id: Date.now().toString(),
-        summary,
-        timestamp,
-        messageCount: chatbotMessages.value.length,
-        messages: [...chatbotMessages.value],
-      }
-      existingList.unshift(newChat)
-      selectedChatId.value = newChat.id
-    }
-    localStorage.setItem("chatHistoryList", JSON.stringify(existingList))
-    chatHistoryList.value = existingList
-  } catch (error) {
-    console.error("Error saving to history list:", error)
-  }
-}
-
-const loadSelectedChat = (chatId = null) => {
-  try {
-    if (chatId) selectedChatId.value = chatId
-    const existingList = JSON.parse(localStorage.getItem("chatHistoryList") || "[]")
-    const selectedChat = existingList.find((chat) => chat.id === selectedChatId.value)
-    if (selectedChat && selectedChat.messages) {
-      chatbotMessages.value = selectedChat.messages.map((msg) => ({
-        ...msg,
-        timestamp: msg.timestamp || new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      }))
-      showQuickReplies.value = chatbotMessages.value.length <= 1
-    }
-    if (windowWidth.value < 768) showHistorySidebar.value = false
-    chatbotScrollToBottom()
-  } catch (error) {
-    console.error("Error loading selected chat:", error)
-  }
-}
-
-const createNewChat = () => {
-  selectedChatId.value = null
-  chatbotMessages.value = [
-    {
-      role: "assistant",
-      content: "Hello 👋 I'm RESQAPP Assistant. How can I help you with emergency services in Calapan City today?",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ]
-  showQuickReplies.value = true
-  quickReplies.value = ["How do I report an incident?", "Emergency contact numbers", "Traffic situation in Calapan"]
-  if (windowWidth.value < 768) showHistorySidebar.value = false
-}
-
-const deleteChatFromHistory = (chatId, event) => {
-  event.stopPropagation()
-  if (confirm("Delete this chat from history?")) {
-    try {
-      const existingList = JSON.parse(localStorage.getItem("chatHistoryList") || "[]")
-      const filteredList = existingList.filter((chat) => chat.id !== chatId)
-      localStorage.setItem("chatHistoryList", JSON.stringify(filteredList))
-      chatHistoryList.value = filteredList
-      if (selectedChatId.value === chatId) createNewChat()
-    } catch (error) {
-      console.error("Error deleting chat:", error)
-    }
-  }
-}
-
-const setupScrollListener = () => {
-  const el = document.querySelector(".chatbot-messages")
-  if (el) {
-    el.addEventListener("scroll", () => {
-      const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
-      isUserAtBottom.value = atBottom
-    })
   }
 }
 
@@ -2638,8 +2302,6 @@ watch(active, async (val) => {
     await nextTick()
     initMap()
     invalidateSoon()
-  } else if (val === "chat") {
-    await nextTick()
   }
 })
 
@@ -2654,11 +2316,6 @@ onMounted(async () => {
   setInterval(fetchActiveAlerts, 30000)
   connectWebSocket()
   testAIEndpoint()
-  showHistorySidebar.value = windowWidth.value >= 768
-  loadChatHistoryList()
-  loadChatHistory()
-  setupScrollListener()
-  chatbotScrollToBottom()
   window.addEventListener("resize", handleResize)
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && !wsConnected.value) {
@@ -2669,11 +2326,6 @@ onMounted(async () => {
 
 const handleResize = () => {
   windowWidth.value = window.innerWidth
-  if (windowWidth.value < 768) {
-    showHistorySidebar.value = false
-  } else {
-    showHistorySidebar.value = true
-  }
 }
 
 const testAIEndpoint = async () => {
@@ -2808,9 +2460,6 @@ onBeforeUnmount(() => {
           <button class="navbtn" :class="{ on: active === 'announcements' }" @click="go('announcements')">
             <span class="nav-icon">◔</span><span class="nav-label">Announcements</span>
           </button>
-          <button class="navbtn" :class="{ on: active === 'chat' }" @click="go('chat')">
-            <span class="nav-icon">✦</span><span class="nav-label">Messages</span>
-          </button>
           <button class="navbtn" :class="{ on: active === 'legal' }" @click="go('legal')">
             <span class="nav-icon">§</span><span class="nav-label">Legal Info</span>
           </button>
@@ -2856,13 +2505,13 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="mini">
-                <div class="mini-icon">✦</div>
-                <div class="miniTitle">Live Chat</div>
+                <div class="mini-icon">◔</div>
+                <div class="miniTitle">Active Alerts</div>
                 <div class="miniText">
-                  Chat directly with responders for urgent assistance.
+                  Stay informed with official announcements from responders.
                 </div>
-                <button class="btn btn-outline-blue" @click="go('chat')">
-                  Open Chat
+                <button class="btn btn-outline-blue" @click="go('announcements')">
+                  View Alerts
                 </button>
               </div>
             </div>
@@ -3453,110 +3102,6 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- ===== CHAT ===== -->
-          <div v-else-if="active === 'chat'" class="chat-layout">
-            <div class="chat-history-sidebar" :class="{ hidden: !showHistorySidebar }">
-              <div class="sidebar-header">
-                <h3>Chat History</h3>
-                <button class="btn-new-chat" @click="createNewChat">+ New</button>
-              </div>
-
-              <div class="chat-history-list">
-                <div
-                  v-for="chat in chatHistoryList"
-                  :key="chat.id"
-                  class="chat-history-item"
-                  :class="{ active: selectedChatId === chat.id }"
-                  @click="loadSelectedChat(chat.id)"
-                >
-                  <div class="chat-item-content">
-                    <div class="chat-summary">{{ chat.summary }}</div>
-                    <div class="chat-meta">
-                      <span class="chat-time">{{ formatChatTime(chat.timestamp) }}</span>
-                      <span class="chat-count">{{ chat.messageCount }} messages</span>
-                    </div>
-                  </div>
-                  <button class="btn-delete-chat" @click="deleteChatFromHistory(chat.id, $event)" title="Delete chat">×</button>
-                </div>
-
-                <div v-if="chatHistoryList.length === 0" class="empty-history">
-                  <p>No chat history yet</p>
-                  <p>Start a new conversation!</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="chat-main-area">
-              <div class="chat-main-header">
-                <button class="btn-toggle-sidebar" @click="showHistorySidebar = !showHistorySidebar" v-if="windowWidth < 768">
-                  ≡ History
-                </button>
-                <h2 class="chat-title">RESQAPP Assistant</h2>
-                <div class="chat-header-actions">
-                  <button v-if="chatbotMessages.length > 1" @click="clearChatHistory" class="btn-clear" title="Clear current chat">
-                    Clear
-                  </button>
-                  <button @click="createNewChat" class="btn-new-chat-header" title="New chat">+ New</button>
-                </div>
-              </div>
-
-              <div class="card chatbot-card">
-                <div class="chatbot-header"></div>
-
-                <div class="chatbot-body">
-                  <div class="chatbot-messages">
-                    <div
-                      v-for="(msg, index) in chatbotMessages"
-                      :key="index"
-                      class="chatbot-message"
-                      :class="msg.role"
-                    >
-                      <div class="message-content">{{ msg.content }}</div>
-                      <div v-if="msg.timestamp" class="message-time">{{ msg.timestamp }}</div>
-                    </div>
-
-                    <div v-if="showQuickReplies" class="chatbot-quick-replies">
-                      <p class="quick-replies-title">Quick questions:</p>
-                      <div class="quick-replies-buttons">
-                        <button @click="useQuickReply('How do I report an incident?')">Report Incident</button>
-                        <button @click="useQuickReply('Current traffic situation')">Traffic Update</button>
-                        <button @click="useQuickReply('Emergency contacts')">Emergency Help</button>
-                      </div>
-                    </div>
-
-                    <div v-if="chatbotLoading" class="chatbot-typing">
-                      <div class="typing-dots"><span></span><span></span><span></span></div>
-                      Assistant is typing…
-                    </div>
-                  </div>
-
-                  <div class="chatbot-input-area">
-                    <div class="chatbot-input-wrapper">
-                      <textarea
-                        ref="chatInput"
-                        v-model="chatbotInput"
-                        placeholder="Type your message…"
-                        rows="1"
-                        @input="adjustTextareaHeight"
-                        @keydown="handleKeyDown"
-                        :disabled="chatbotLoading"
-                      ></textarea>
-                      <button
-                        @click="sendChatbotMessage"
-                        class="btn-send"
-                        :disabled="!chatbotInput.trim() || chatbotLoading"
-                      >
-                        <span v-if="!chatbotLoading">Send</span>
-                        <span v-else class="sending">…</span>
-                      </button>
-                    </div>
-                    <div class="input-hint">Press Enter to send • Shift+Enter for new line</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- ===== PROFILE ===== -->
           <div v-else class="card">
             <div class="profile-card">
@@ -3771,7 +3316,77 @@ onBeforeUnmount(() => {
    DESIGN TOKENS
    ============================================================ */
 
+:root {
+  /* Brand (Calapan blue) */
+  --brand-50:  #eff6ff;
+  --brand-100: #dbeafe;
+  --brand-200: #bfdbfe;
+  --brand-300: #93c5fd;
+  --brand-400: #60a5fa;
+  --brand-500: #3b82f6;
+  --brand-600: #1d6fe0;
+  --brand-700: #0b4fa3;
+  --brand-800: #063e8a;
+  --brand-900: #052e6b;
+  --brand-950: #021b47;
 
+  /* Ink (neutral) */
+  --ink-50:  #f8fafc;
+  --ink-100: #f1f5f9;
+  --ink-200: #e2e8f0;
+  --ink-300: #cbd5e1;
+  --ink-400: #94a3b8;
+  --ink-500: #64748b;
+  --ink-600: #475569;
+  --ink-700: #334155;
+  --ink-800: #1e293b;
+  --ink-900: #0f172a;
+  --ink-950: #020617;
+
+  /* Success */
+  --success-50:  #ecfdf5;
+  --success-100: #d1fae5;
+  --success-600: #059669;
+  --success-700: #047857;
+
+  /* Danger */
+  --danger-50:  #fef2f2;
+  --danger-100: #fee2e2;
+  --danger-600: #dc2626;
+  --danger-700: #b91c1c;
+
+  /* Warning */
+  --warning-50:  #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+
+  /* Background */
+  --bg: #f5f8fc;
+
+  /* Radii */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   18px;
+  --radius-full: 999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, .08);
+  --shadow-lg: 0 10px 24px rgba(15, 23, 42, .10);
+  --shadow-xl: 0 20px 40px rgba(15, 23, 42, .16);
+  --shadow-blue:    0 4px 14px rgba(11, 79, 163, .22);
+  --shadow-blue-lg: 0 8px 22px rgba(11, 79, 163, .30);
+
+  /* Transitions */
+  --transition:      .22s ease;
+  --transition-fast: .15s ease;
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(29, 111, 224, .18);
+}
 
 
 /* ============================================================
@@ -3905,30 +3520,22 @@ a {
    ============================================================ */
 
 .content::-webkit-scrollbar,
-.chatbot-messages::-webkit-scrollbar,
-.chat-history-list::-webkit-scrollbar,
 .modal-content::-webkit-scrollbar {
   width: 7px;
 }
 
 .content::-webkit-scrollbar-track,
-.chatbot-messages::-webkit-scrollbar-track,
-.chat-history-list::-webkit-scrollbar-track,
 .modal-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .content::-webkit-scrollbar-thumb,
-.chatbot-messages::-webkit-scrollbar-thumb,
-.chat-history-list::-webkit-scrollbar-thumb,
 .modal-content::-webkit-scrollbar-thumb {
   background: var(--ink-300);
   border-radius: var(--radius-full);
 }
 
 .content::-webkit-scrollbar-thumb:hover,
-.chatbot-messages::-webkit-scrollbar-thumb:hover,
-.chat-history-list::-webkit-scrollbar-thumb:hover,
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: var(--brand-300);
 }
@@ -6415,478 +6022,6 @@ select {
 
 
 /* ============================================================
-   CHAT LAYOUT
-   ============================================================ */
-
-.chat-layout {
-  display: flex;
-  gap: 1rem;
-
-  height: calc(100vh - 175px);
-  min-height: 520px;
-}
-
-.chat-history-sidebar {
-  width: 265px;
-  flex-shrink: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: .75rem;
-
-  padding: .9rem;
-
-  background: #fff;
-  border: 1px solid var(--ink-200);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-
-  overflow: hidden;
-}
-
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 .25rem;
-}
-
-.sidebar-header h3 {
-  color: var(--brand-800);
-  font-size: .94rem;
-  font-weight: 750;
-}
-
-.btn-new-chat {
-  padding: .34rem .68rem;
-
-  color: #fff;
-  background:
-    linear-gradient(135deg, var(--brand-800), var(--brand-600));
-  border: 0;
-  border-radius: var(--radius-sm);
-
-  font-size: .7rem;
-  font-weight: 650;
-  cursor: pointer;
-}
-
-.chat-history-list {
-  flex: 1;
-
-  display: flex;
-  flex-direction: column;
-  gap: .3rem;
-
-  overflow-y: auto;
-}
-
-.chat-history-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
-
-  padding: .65rem .7rem;
-
-  background: var(--ink-50);
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.chat-history-item:hover {
-  background: var(--brand-50);
-  border-color: var(--brand-100);
-}
-
-.chat-history-item.active {
-  background:
-    linear-gradient(135deg, var(--brand-50), #f8fbff);
-  border-color: var(--brand-200);
-  box-shadow: inset 3px 0 0 var(--brand-600);
-}
-
-.chat-item-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-summary {
-  margin-bottom: .12rem;
-  overflow: hidden;
-
-  color: var(--brand-800);
-  font-size: .78rem;
-  font-weight: 650;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.chat-meta {
-  display: flex;
-  gap: .45rem;
-  color: var(--ink-400);
-  font-size: .64rem;
-}
-
-.btn-delete-chat {
-  padding: .15rem .25rem;
-
-  color: var(--ink-400);
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-sm);
-
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.btn-delete-chat:hover {
-  color: var(--danger-600);
-  background: var(--danger-50);
-}
-
-.empty-history {
-  padding: 2rem 1rem;
-  color: var(--ink-400);
-  font-size: .78rem;
-  text-align: center;
-}
-
-.chat-main-area {
-  flex: 1;
-  min-width: 0;
-
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  background: #fff;
-  border: 1px solid var(--ink-200);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-}
-
-.chat-main-header {
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-
-  padding: .85rem 1.1rem;
-
-  background:
-    linear-gradient(180deg, #fff, #f8fbff);
-  border-bottom: 1px solid var(--ink-200);
-}
-
-.btn-toggle-sidebar {
-  display: none;
-
-  padding: .3rem .65rem;
-
-  color: var(--brand-700);
-  background: #fff;
-  border: 1px solid var(--brand-100);
-  border-radius: var(--radius-sm);
-
-  font-size: .75rem;
-  cursor: pointer;
-}
-
-.chat-title {
-  flex: 1;
-  color: var(--brand-800);
-  font-size: 1rem;
-  font-weight: 750;
-}
-
-.chat-header-actions {
-  display: flex;
-  gap: .35rem;
-}
-
-.btn-clear,
-.btn-new-chat-header {
-  padding: .35rem .68rem;
-
-  color: var(--brand-700);
-  background: #fff;
-  border: 1px solid var(--brand-100);
-  border-radius: var(--radius-sm);
-
-  font-size: .73rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.btn-clear:hover {
-  color: var(--danger-600);
-  background: var(--danger-50);
-  border-color: var(--danger-100);
-}
-
-.btn-new-chat-header {
-  color: #fff;
-  background: var(--brand-700);
-  border-color: var(--brand-700);
-}
-
-.btn-new-chat-header:hover { background: var(--brand-800); }
-
-
-/* ============================================================
-   CHATBOT
-   ============================================================ */
-
-.chatbot-card {
-  flex: 1;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-
-  padding: 0;
-  margin: 0;
-
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.chatbot-header { display: none; }
-
-.chatbot-body {
-  flex: 1;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.chatbot-messages {
-  flex: 1;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: .7rem;
-
-  padding: 1.15rem;
-  overflow-y: auto;
-}
-
-.chatbot-message {
-  max-width: 76%;
-  display: flex;
-  flex-direction: column;
-}
-
-.chatbot-message.user {
-  margin-left: auto;
-  align-items: flex-end;
-}
-
-.chatbot-message.assistant {
-  margin-right: auto;
-  align-items: flex-start;
-}
-
-.message-content {
-  padding: .68rem .9rem;
-
-  color: var(--ink-800);
-  background: var(--ink-50);
-  border: 1px solid var(--ink-100);
-  border-radius: 16px;
-
-  font-size: .86rem;
-  line-height: 1.5;
-  word-wrap: break-word;
-}
-
-.chatbot-message.assistant .message-content {
-  background: var(--brand-50);
-  border-color: var(--brand-100);
-  border-bottom-left-radius: 5px;
-}
-
-.chatbot-message.user .message-content {
-  color: #fff;
-  background:
-    linear-gradient(135deg, var(--brand-800), var(--brand-600));
-  border: none;
-  border-bottom-right-radius: 5px;
-  box-shadow: 0 3px 10px rgba(11, 79, 163, .15);
-}
-
-.message-time {
-  margin-top: .2rem;
-  padding: 0 .3rem;
-
-  color: var(--ink-400);
-  font-size: .63rem;
-}
-
-.chatbot-quick-replies { margin: .85rem 0 .2rem; }
-
-.quick-replies-title {
-  margin-bottom: .45rem;
-  color: var(--ink-500);
-  font-size: .72rem;
-  font-weight: 550;
-}
-
-.quick-replies-buttons {
-  display: flex;
-  gap: .4rem;
-  flex-wrap: wrap;
-}
-
-.quick-replies-buttons button {
-  padding: .4rem .72rem;
-
-  color: var(--brand-700);
-  background: #fff;
-  border: 1px solid var(--brand-100);
-  border-radius: var(--radius-full);
-
-  font-size: .74rem;
-  font-weight: 550;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.quick-replies-buttons button:hover {
-  color: var(--brand-800);
-  background: var(--brand-50);
-  border-color: var(--brand-300);
-}
-
-.chatbot-typing {
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-
-  padding: .3rem .45rem;
-
-  color: var(--ink-500);
-  font-size: .75rem;
-}
-
-.typing-dots {
-  display: flex;
-  gap: .18rem;
-}
-
-.typing-dots span {
-  width: 5px;
-  height: 5px;
-  background: var(--brand-500);
-  border-radius: 50%;
-  animation: typing 1.4s infinite;
-}
-
-.typing-dots span:nth-child(2) { animation-delay: .2s; }
-.typing-dots span:nth-child(3) { animation-delay: .4s; }
-
-@keyframes typing {
-  0%, 60%, 100% { transform: translateY(0); opacity: .45; }
-  30%           { transform: translateY(-3px); opacity: 1; }
-}
-
-.chatbot-input-area {
-  padding: .8rem 1rem;
-  background: #fff;
-  border-top: 1px solid var(--ink-200);
-}
-
-.chatbot-input-wrapper {
-  display: flex;
-  align-items: flex-end;
-  gap: .5rem;
-
-  padding: .35rem;
-
-  background: var(--ink-50);
-  border: 1px solid var(--ink-200);
-  border-radius: 15px;
-
-  transition: var(--transition-fast);
-}
-
-.chatbot-input-wrapper:focus-within {
-  background: #fff;
-  border-color: var(--brand-400);
-  box-shadow: var(--focus-ring);
-}
-
-.chatbot-input-wrapper textarea {
-  flex: 1;
-  min-height: 40px;
-  max-height: 120px;
-
-  padding: .55rem .65rem;
-
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-
-  font-size: .88rem;
-  resize: none;
-  box-shadow: none;
-  outline: none;
-}
-
-.chatbot-input-wrapper textarea:focus { box-shadow: none; }
-
-.btn-send {
-  width: 38px;
-  height: 38px;
-  flex-shrink: 0;
-
-  display: grid;
-  place-items: center;
-
-  color: #fff;
-  background:
-    linear-gradient(135deg, var(--brand-800), var(--brand-600));
-  border: 0;
-  border-radius: 11px;
-
-  font-size: .78rem;
-  font-weight: 650;
-
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.btn-send:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-blue);
-}
-
-.btn-send:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
-.sending { font-size: 1rem; letter-spacing: -.05em; }
-
-.input-hint {
-  margin-top: .35rem;
-  padding-left: .25rem;
-  color: var(--ink-400);
-  font-size: .68rem;
-}
-
-
-/* ============================================================
    FOOTER
    ============================================================ */
 
@@ -6952,7 +6087,6 @@ a:focus-visible {
 .navbtn:focus-visible,
 .btn:focus-visible,
 .action-btn:focus-visible,
-.btn-send:focus-visible,
 .btn-new-report:focus-visible,
 .bottom-nav-btn:focus-visible,
 .btn-view:focus-visible,
@@ -6970,7 +6104,6 @@ a:focus-visible {
   .main { padding: 1.2rem 1.25rem; }
   .topbar-inner { padding: .7rem 1.25rem; }
   .nav { width: 220px; }
-  .chat-history-sidebar { width: 240px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -7020,21 +6153,6 @@ a:focus-visible {
     padding: 1.3rem;
     border-radius: var(--radius-lg);
   }
-
-  .chat-layout {
-    flex-direction: column;
-    height: auto;
-    min-height: 0;
-  }
-
-  .chat-history-sidebar { width: 100%; height: 250px; }
-  .chat-history-sidebar.hidden { display: none; }
-
-  .btn-toggle-sidebar { display: inline-flex; }
-
-  .chatbot-card   { min-height: 500px; }
-  .chat-main-area { min-height: 520px; }
-  .chatbot-message { max-width: 88%; }
 
   .legal-grid { grid-template-columns: 1fr; }
 }
