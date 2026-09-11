@@ -6306,4 +6306,6 @@ textarea {
   touch-action: none;        /* prevents scroll interference */
 }
 
+}
+
 </style>
