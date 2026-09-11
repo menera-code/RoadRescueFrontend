@@ -4435,10 +4435,13 @@ onBeforeUnmount(() => {
 /* Optional: if you have any Leaflet controls that still peek, increase further */
 .leaflet-pane,
 .leaflet-control {
-  z-index: 1000 !important;         /* force them lower (use cautiously) */
-}
+  z-index: 400 !important;
 }
 
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 450 !important;
+} 
 /* ===== CONTENT AREA ===== */
 .content {
   flex: 1;
