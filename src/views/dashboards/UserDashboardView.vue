@@ -6085,6 +6085,7 @@ textarea {
   }
   .main {
     padding: 0 1rem;
+    margin-top: -400px;
   }
   .two {
     grid-template-columns: 1fr;
